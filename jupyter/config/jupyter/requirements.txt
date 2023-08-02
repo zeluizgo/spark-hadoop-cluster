@@ -1,0 +1,13 @@
+scikit-learn
+matplotlib
+jupyter
+pyspark
+numpy
+dask
+pandas
+findspark
+dask-yarn
+bash_kernel
+nltk
+tweepy
+kafka-python
