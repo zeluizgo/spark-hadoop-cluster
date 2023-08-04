@@ -6,6 +6,7 @@ services:
     hostname: spark-master
     tty: true
     volumes:
+      - ../../../projects:/user_data
       - /home/hadoop:/hadoop_data
       - vol1:/csvs
     ports:
