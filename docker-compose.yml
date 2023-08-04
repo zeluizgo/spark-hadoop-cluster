@@ -6,7 +6,6 @@ services:
     hostname: spark-master
     tty: true
     volumes:
-      - ../../../projects:/user_data
       - /home/hadoop:/hadoop_data
       - vol1:/csvs
     ports:
@@ -74,6 +73,8 @@ services:
     container_name: hive-server
     hostname: hive-server
     tty: true
+    volumes:
+      - /home/hadoop:/hadoop_data
     ports:
       - "10000:10000" # HiveServer2 - Binary Mode
       - "10001:10001" # HiveServer - HTTP Mode
@@ -92,6 +93,8 @@ services:
     container_name: jupyter
     hostname: jupyter
     tty: true
+    volumes:
+      - ../../../projects:/user_data
     ports:
       - "8888:8888" # Jupyter
     networks:
