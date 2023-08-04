@@ -1,5 +1,11 @@
 FROM arm64v8/openjdk:8-jre-slim
 
+# Variaveis de ambiente do Hadoop
+ENV HADOOP_VERSION 3.3.6
+ENV HADOOP_MINOR_VERSION 3
+ENV HADOOP_HOME /usr/hadoop-$HADOOP_VERSION
+ENV HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+
 # Variaveis de ambiente do Hive
 ENV HIVE_VERSION 3.1.3
 ENV HIVE_HOME=/usr/hive
@@ -10,7 +16,7 @@ ENV CLASSPATH=$HIVE_HOME/lib
 
 # Adicao de valores aos paths abaixo para que os componentes os localizem
 ENV PYTHONPATH /usr/bin/python3
-ENV PATH $PATH:$JAVA_HOME/bin:$PYTHONPATH:$HIVE_HOME/bin
+ENV PATH $PATH:$JAVA_HOME/bin:$PYTHONPATH:$HIVE_HOME/bin:$HADOOP_HOME/bin
 
 # Install dependencies
 RUN apt-get update && apt-get install -y curl gnupg2 ca-certificates
@@ -48,8 +54,15 @@ RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
 COPY /config/config /root/.ssh
 RUN chmod 600 /root/.ssh/config
 
-    # Hive
+    # Hadoop
 RUN wget \
+    "http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" \
+    && tar zvxf hadoop-${HADOOP_VERSION}.tar.gz -C /usr/ \
+    && rm hadoop-${HADOOP_VERSION}.tar.gz \
+    && rm -rf ${HADOOP_HOME}/share/doc \
+    && chown -R root:root ${HADOOP_HOME} \
+    # Hive
+    && wget \
     https://archive.apache.org/dist/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz \
     && tar zxvf apache-hive-${HIVE_VERSION}-bin.tar.gz \
     && rm apache-hive-${HIVE_VERSION}-bin.tar.gz \

@@ -80,7 +80,7 @@ services:
       - "10001:10001" # HiveServer - HTTP Mode
       - "10002:10002" # Hiveserver WebUI
       - "9083:9083" # Hive Metastore
-      - "3036:3036" # MySQL
+      - "3306:3306" # MySQL
     networks:
       cluster-network:
         ipv4_address: 10.5.0.5
