@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   spark-master:
-    image: spark-hadoop-cluster-slim:latest
+    image: spark-hadoop-cluster:latest
     container_name: spark-master
     hostname: spark-master
     tty: true
@@ -16,13 +16,7 @@ services:
       - "8080:8080" # WebUI Spark Master
       - "18080:18080" # History WebUI Spark Master
       - "8042:8042" # NodeManager
-      - "8888:8888" # Jupyter
       - "4040:4040" # Spark
-      - "10000:10000" # HiveServer2 - Binary Mode
-      - "10001:10001" # HiveServer - HTTP Mode
-      - "10002:10002" # Hiveserver WebUI
-      - "9083:9083" # Hive Metastore
-      - "9092:9092" # Kafka
     networks:
       cluster-network:
         ipv4_address: 10.5.0.2
@@ -32,7 +26,7 @@ services:
       placement:
         constraints: [node.role == manager]
   spark-worker-1:
-    image: spark-hadoop-cluster-slim:latest
+    image: spark-hadoop-cluster:latest
     container_name: spark-worker-1
     hostname: spark-worker-1
     tty: true
@@ -54,7 +48,7 @@ services:
         constraints:
           - node.labels.workerid == 1
   spark-worker-2:
-    image: spark-hadoop-cluster-slim:latest
+    image: spark-hadoop-cluster:latest
     container_name: spark-worker-2
     hostname: spark-worker-2
     tty: true
@@ -71,6 +65,38 @@ services:
     networks:
       cluster-network:
         ipv4_address: 10.5.0.4
+    deploy:
+      placement:
+        constraints:
+          - node.labels.workerid == 2
+  hive-server:
+    image: hive-server:latest
+    container_name: hive-server
+    hostname: hive-server
+    tty: true
+    ports:
+      - "10000:10000" # HiveServer2 - Binary Mode
+      - "10001:10001" # HiveServer - HTTP Mode
+      - "10002:10002" # Hiveserver WebUI
+      - "9083:9083" # Hive Metastore
+      - "3036:3036" # MySQL
+    networks:
+      cluster-network:
+        ipv4_address: 10.5.0.5
+    deploy:
+      placement:
+        constraints:
+          - node.labels.workerid == 1
+  jupyter:
+    image: jupyter:latest
+    container_name: jupyter
+    hostname: jupyter
+    tty: true
+    ports:
+      - "8888:8888" # Jupyter
+    networks:
+      cluster-network:
+        ipv4_address: 10.5.0.6
     deploy:
       placement:
         constraints:
