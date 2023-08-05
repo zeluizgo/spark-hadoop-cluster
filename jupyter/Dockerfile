@@ -60,6 +60,7 @@ RUN wget \
     # Configurando o JAVA_HOME para os processos localizarem a instalação do Java
 RUN echo "export JAVA_HOME=${JAVA_HOME}" >> /etc/environment
 
+COPY config/hadoop/*.xml /usr/hadoop-${HADOOP_VERSION}/etc/hadoop/
 COPY config/scripts /
 
 # Porta 8888 - jupyter notebook
