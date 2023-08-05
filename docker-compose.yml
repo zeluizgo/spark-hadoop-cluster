@@ -95,7 +95,7 @@ services:
     hostname: jupyter
     tty: true
     volumes:
-      - ../../../projects:/user_data
+      - ../../projects:/user_data
     ports:
       - "8888:8888" # Jupyter
     networks:
