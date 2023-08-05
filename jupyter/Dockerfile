@@ -1,5 +1,6 @@
 FROM arm64v8/openjdk:8-jre-slim
 
+
 # Configuracoes do pyspark
 ENV PYSPARK_PYTHON python3
 
@@ -39,6 +40,22 @@ RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
     chmod 600 ~/.ssh/authorized_keys
 COPY /config/config /root/.ssh
 RUN chmod 600 /root/.ssh/config
+
+
+# Variaveis de ambiente do Hadoop
+ENV HADOOP_VERSION 3.3.6
+ENV HADOOP_MINOR_VERSION 3
+ENV HADOOP_HOME /usr/hadoop-$HADOOP_VERSION
+ENV HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+ENV YARN_CONF_DIR $HADOOP_CONF_DIR
+
+    # Hadoop
+RUN wget \
+    "http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" \
+    && tar zvxf hadoop-${HADOOP_VERSION}.tar.gz -C /usr/ \
+    && rm hadoop-${HADOOP_VERSION}.tar.gz \
+    && rm -rf ${HADOOP_HOME}/share/doc \
+    && chown -R root:root ${HADOOP_HOME}
 
     # Configurando o JAVA_HOME para os processos localizarem a instalação do Java
 RUN echo "export JAVA_HOME=${JAVA_HOME}" >> /etc/environment
