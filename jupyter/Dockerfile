@@ -43,7 +43,7 @@ RUN chmod 600 /root/.ssh/config
 
 
 # Variaveis de ambiente do Hadoop
-ENV HADOOP_VERSION 3.3.6
+ENV HADOOP_VERSION 3.3.5
 ENV HADOOP_MINOR_VERSION 3
 ENV HADOOP_HOME /usr/hadoop-$HADOOP_VERSION
 ENV HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
