@@ -7,9 +7,11 @@
 
 # Abaixo temos o trecho que rodará apenas no master.
 if [[ $HOSTNAME = spark-master ]]; then
-    
-    # Formatamos o namenode
-    #hdfs namenode -format
+
+    if [! -d "/hadoop_data/data" ]; then
+        # Formatamos o namenode
+        hdfs namenode -format
+    fi
 
     # Iniciamos os serviços
     $HADOOP_HOME/sbin/start-dfs.sh
