@@ -11,9 +11,16 @@ ENV PYSPARK_DRIVER_PYTHON=python3
 # ENV PYSPARK_DRIVER_PYTHON_OPTS='notebook'
 
 
+# Variaveis de ambiente do Hadoop
+ENV HADOOP_VERSION 3.3.5
+ENV HADOOP_MINOR_VERSION 3
+ENV HADOOP_HOME /usr/hadoop-$HADOOP_VERSION
+ENV HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+ENV YARN_CONF_DIR $HADOOP_CONF_DIR
+
 # Adicao de valores aos paths abaixo para que os componentes os localizem
 ENV PYTHONPATH /usr/bin/python3
-ENV PATH $PATH:$JAVA_HOME/bin:$PYTHONPATH
+ENV PATH $PATH:$JAVA_HOME/bin:$PYTHONPATH:$HADOOP_HOME/bin
 
 # Install dependencies
 RUN apt-get update && apt-get install -y curl gnupg2 ca-certificates
@@ -40,14 +47,6 @@ RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
     chmod 600 ~/.ssh/authorized_keys
 COPY /config/config /root/.ssh
 RUN chmod 600 /root/.ssh/config
-
-
-# Variaveis de ambiente do Hadoop
-ENV HADOOP_VERSION 3.3.5
-ENV HADOOP_MINOR_VERSION 3
-ENV HADOOP_HOME /usr/hadoop-$HADOOP_VERSION
-ENV HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
-ENV YARN_CONF_DIR $HADOOP_CONF_DIR
 
     # Hadoop
 RUN wget \
