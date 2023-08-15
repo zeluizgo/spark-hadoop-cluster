@@ -8,7 +8,11 @@
 # Abaixo temos o trecho que rodará apenas no master.
 if [[ $HOSTNAME = spark-master ]]; then
 
-    if [! -d "/hadoop_data/data" ]; then
+    if [ -d "/hadoop_data/data/nameNode" ]
+    then
+        echo "nameNode hadoop directory already exists." 
+        # here could get namenode out of safemode...lol
+    else
         # Formatamos o namenode
         hdfs namenode -format
     fi
