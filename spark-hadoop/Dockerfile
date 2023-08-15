@@ -67,7 +67,7 @@ RUN python3 -m pip install -r requirements.txt  --upgrade \
     && python3 -m pip install bash_kernel
     
 # Install ssh
-RUN apt-get update && apt-get install -y --no-install-recommends ssh openssh-server wget
+RUN apt-get update && apt-get install -y --no-install-recommends ssh openssh-server wget rsync
 
 # Keys dos nodes. Necessarias para se comunicarem por SSH
 RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
