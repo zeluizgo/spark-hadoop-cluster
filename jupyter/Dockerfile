@@ -31,7 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 python3
 #    ln -s /usr/bin/python3.11 /usr/bin/python \
 #    ln -s /usr/bin/python3.11 /usr/bin/python3 
 
-COPY /config/jupyter/requirements.txt /
+COPY ../spark-hadoop/config/jupyter/requirements.txt /
 
 RUN python3 -m pip install -r requirements.txt  --upgrade \
     && python3 -m pip install dask[bag] --upgrade \
@@ -45,7 +45,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ssh openssh-ser
 RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
     chmod 600 ~/.ssh/authorized_keys
-COPY /config/config /root/.ssh
+COPY ../spark-hadoop/config/config /root/.ssh
 RUN chmod 600 /root/.ssh/config
 
     # Hadoop
@@ -59,7 +59,7 @@ RUN wget \
     # Configurando o JAVA_HOME para os processos localizarem a instalação do Java
 RUN echo "export JAVA_HOME=${JAVA_HOME}" >> /etc/environment
 
-COPY config/hadoop/*.xml /usr/hadoop-${HADOOP_VERSION}/etc/hadoop/
+COPY ../spark-hadoop/config/hadoop/*.xml /usr/hadoop-${HADOOP_VERSION}/etc/hadoop/
 COPY config/scripts /
 
 # Porta 8888 - jupyter notebook
