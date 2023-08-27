@@ -51,7 +51,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ssh openssh-ser
 RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
     chmod 600 ~/.ssh/authorized_keys
-COPY /config/config /root/.ssh
+COPY /spark-hadoop/config/config /root/.ssh
 RUN chmod 600 /root/.ssh/config
 
     # Hadoop
@@ -77,12 +77,12 @@ RUN wget \
     # Configurando o JAVA_HOME para os processos localizarem a instalação do Java
     && echo "export JAVA_HOME=${JAVA_HOME}" >> /etc/environment
 
-COPY config/hive/*.xml $HIVE_HOME/conf/
+COPY /hive/config/hive/*.xml $HIVE_HOME/conf/
 
 
 # Todos os arquivos de configuracao que devem ser copiados para dentro do
 # container estao aqui
-COPY config/scripts /
+COPY /hive/scripts /
 
 # Portas 10000:10002 relativas ao Hiveserver2, 9999 webui do Hiveserver
 EXPOSE 22 9083 10000 10001 10002 9999 3306
