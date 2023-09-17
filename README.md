@@ -10,7 +10,7 @@ Veja no diagrama abaixo os computadores em rede e a disposição dos contêinere
 
 ## Rodar Localmente
 1. [Clone o repositorio](#1-clone-o-repositório)
-2. [Prepare espaço de armazenamento para persistencia de dados](#2-prepare-espaco-de-armazenamento-para-persistencia-de-dados)
+2. [Prepare espaço de armazenamento para persistencia de dados](#2-prepare-espaço-de-armazenamento-para-persistencia-de-dados)
 3. [Compilando imagens Spark, Hive e Jupyter](#3-compilando-imagens-spark,-hive-e-jupyter)
 4. [Crie um cluster swarm](#4-crie-um-cluster-swarm)
 5. [Deploy do cluster Spark](#5-deploy-do-cluster-spark)
