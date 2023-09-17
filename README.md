@@ -17,7 +17,7 @@ Veja no diagrama abaixo os computadores em rede e a disposição dos contêinere
 
 ### 1. Clone o repositório
 
-Clone the `spark-tpc-ds-performance-test` repo locally. In a terminal, run:
+Clone o repositório `spark-hadoop-cluster` localmente. Em um terminal, execute:
 
 ``` 
 $ git clone https://github.com/zeluizgo/spark-hadoop-cluster.git 
