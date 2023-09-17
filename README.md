@@ -93,7 +93,7 @@ Para que fixemos no momento do deploy e réplicas que as imagens spark específi
 Onde IDXXXXX e IDYYYYY é o id do nó(nodes em inglês) das máquinas worker no cluster swarm e que pode ser obtido executando o comando abaixo na máquina eleita como a master, assim:
 ``` docker node ls ```
 
-### 5.	Deploy do cluster Spark
+### 5. Deploy do cluster Spark
 
 Com as imagens compiladas em todas as máquinas e o cluster swarm de pé e com as máquinas identificadas, deve-se então criar um serviço spark especifico para ser o driver (chamaremos aqui de spark-master) e outros dois serviços específicos para os executors (chamaremos aqui de spark-worker-1 e spark-worker-2). 
 
