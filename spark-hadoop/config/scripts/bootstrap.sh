@@ -26,6 +26,7 @@ if [[ $HOSTNAME = spark-master ]]; then
     hdfs dfs -mkdir /datasets
     hdfs dfs -mkdir /datasets_processed
     hdfs dfs -mkdir /spark-logs
+    hdfs dfs -mkdir /shared-libs
 
     $SPARK_HOME/sbin/start-history-server.sh
 

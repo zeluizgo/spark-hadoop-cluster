@@ -11,6 +11,6 @@
 # solicitar um token
 cd /user_data
 jupyter trust *.ipynb
-jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='' --NotebookApp.password='' &
+jupyter lab --NotebookApp.allow_origin='*' --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='' --NotebookApp.password='' 
 
 while :; do sleep 2073600; done
