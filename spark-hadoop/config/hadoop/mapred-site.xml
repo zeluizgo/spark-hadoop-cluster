@@ -39,6 +39,6 @@
     </property>
     <property>
         <name>yarn.app.mapreduce.am.command-opts</name>
-        <value>-Xm256m</value>
+        <value>-Xmx256m</value>
     </property>
 </configuration>
