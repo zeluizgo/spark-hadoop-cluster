@@ -1,4 +1,4 @@
-FROM arm64v8/openjdk:17-jre-slim
+FROM openjdk:17-jre-slim
 
 # Variaveis de ambiente do Hadoop
 ENV HADOOP_VERSION 3.3.5
