@@ -130,10 +130,10 @@ ENV HADOOP_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"
 ENV YARN_RESOURCEMANAGER_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"
 
 # 2. (Optional) Or patch the scripts directly
-RUN sed -i '/^export JAVA_HOME/a \
+RUN sed -i '/^# *export HADOOP_OPTS=/a \
 export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
       $HADOOP_HOME/etc/hadoop/hadoop-env.sh && \
-    sed -i '/^export YARN_RESOURCEMANAGER_OPTS/a \
+    sed -i '/^# *export YARN_RESOURCEMANAGER_OPTS=/a \
 export YARN_RESOURCEMANAGER_OPTS="$YARN_RESOURCEMANAGER_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
       $HADOOP_HOME/etc/hadoop/yarn-env.sh
 
