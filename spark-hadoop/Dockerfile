@@ -123,6 +123,20 @@ EXPOSE 9000 4040 8020 22 8080 7077 8081
 # Portas Spark/yarn 8088
 EXPOSE 8088 6066 7001 8030 8031 8032 2181 2888 3888  
 
+# … your existing layers …
+
+# 1. Define JVM flags via ENV
+ENV HADOOP_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"
+ENV YARN_RESOURCEMANAGER_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"
+
+# 2. (Optional) Or patch the scripts directly
+RUN sed -i '/^export JAVA_HOME/a \
+export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
+      $HADOOP_HOME/etc/hadoop/hadoop-env.sh && \
+    sed -i '/^export YARN_RESOURCEMANAGER_OPTS/a \
+export YARN_RESOURCEMANAGER_OPTS="$YARN_RESOURCEMANAGER_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
+      $HADOOP_HOME/etc/hadoop/yarn-env.sh
+
 # Algumas configuracoes adicionais e inicio de alguns servicoes que devem ser feitos em
 # tempo de execucao estao presentes no script bootstrap.
 # Este cuidará de colocar alguns datasets exemplo dentro do HDFS, bem como de iniciar 
