@@ -64,7 +64,6 @@ services:
     ports:
       - "8082:8081" # WebUI Spark worker
       - "7042:8042" # NodeManager
-      - "8088:8088" # ResourceManager
     environment:
       - "SPARK_LOCAL_IP=spark-worker-2"
       - "SPARK_WORKER_WEBUI_PORT=8081"
