@@ -17,6 +17,7 @@ ENV CLASSPATH=$HIVE_HOME/lib
 ENV SPARK_VERSION 3.4.1
 ENV SPARK_HOME /usr/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}
 ENV SPARK_DIST_CLASSPATH="$HADOOP_HOME/etc/hadoop/*:$HADOOP_HOME/share/hadoop/common/lib/*:$HADOOP_HOME/share/hadoop/common/*:$HADOOP_HOME/share/hadoop/hdfs/*:$HADOOP_HOME/share/hadoop/hdfs/lib/*:$HADOOP_HOME/share/hadoop/hdfs/*:$HADOOP_HOME/share/hadoop/yarn/lib/*:$HADOOP_HOME/share/hadoop/yarn/*:$HADOOP_HOME/share/hadoop/mapreduce/lib/*:$HADOOP_HOME/share/hadoop/mapreduce/*:$HADOOP_HOME/share/hadoop/tools/lib/*"
+ENV SPARK_CONF_DIR $SPARK_HOME/conf
 
 # Configuracoes do pyspark
 ENV PYSPARK_PYTHON python3
