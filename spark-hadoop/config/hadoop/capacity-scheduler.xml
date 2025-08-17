@@ -45,11 +45,48 @@
 
   <property>
     <name>yarn.scheduler.capacity.root.queues</name>
-    <value>default</value>
-    <description>
-      The queues at the this level (root is the root queue).
-    </description>
+    <value>default,spring,jupyter</value>
+      <description>
+        The queues at the this level (root is the root queue).
+      </description>
   </property>
+
+  <!-- Spark queue -->
+  <property>
+    <name>yarn.scheduler.capacity.root.spring.capacity</name>
+    <value>50</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.capacity.root.spring.maximum-capacity</name>
+    <value>50</value>
+  </property>
+
+  <!-- Jupyter queue -->
+  <property>
+    <name>yarn.scheduler.capacity.root.jupyter.capacity</name>
+    <value>50</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.capacity.root.jupyter.maximum-capacity</name>
+    <value>50</value>
+  </property>
+
+  <!-- Limit AMs to 20% of queue resources -->
+  <property>
+    <name>yarn.scheduler.capacity.root.spring.maximum-am-resource-percent</name>
+    <value>0.2</value>
+  </property>
+
+  <!-- Hard cap: no app in spring queue can exceed 1024 MB -->
+  <property>
+    <name>yarn.scheduler.capacity.root.spring.maximum-allocation-mb</name>
+    <value>1024</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.capacity.root.spring.maximum-allocation-vcores</name>
+    <value>2</value>
+  </property>
+
 
   <property>
     <name>yarn.scheduler.capacity.root.default.capacity</name>
