@@ -28,6 +28,12 @@ if [[ $HOSTNAME = spark-master ]]; then
     hdfs dfs -mkdir /spark-logs
     hdfs dfs -mkdir /shared-libs
 
+    #tar -czf spark-libs.tar.gz $SPARK_HOME/jars/
+
+    #hdfs dfs -put -f spark-libs.tar.gz /shared-libs
+    hdfs dfs -put -f $SPARK_HOME/jars/* /shared-libs/
+
+    # Iniciamos o history server do Spark
     #$SPARK_HOME/sbin/start-history-server.sh
     $SPARK_HOME/bin/spark-class org.apache.spark.deploy.history.HistoryServer
 
