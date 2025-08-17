@@ -58,7 +58,7 @@
   </property>
   <property>
     <name>yarn.scheduler.capacity.root.spring.maximum-capacity</name>
-    <value>50</value>
+    <value>100</value>
   </property>
 
   <!-- Jupyter queue -->
@@ -68,7 +68,7 @@
   </property>
   <property>
     <name>yarn.scheduler.capacity.root.jupyter.maximum-capacity</name>
-    <value>50</value>
+    <value>100</value>
   </property>
 
   <!-- Limit AMs to 20% of queue resources -->
