@@ -1,13 +1,10 @@
-scikit-learn
-matplotlib
-jupyter
+# Core Spark & dependencies
 pyspark==3.4.1
-numpy
-dask
-pandas
 findspark
-dask-yarn
+pyarrow==12.0.1
+pandas==2.0.3
+numpy==1.24.3
+
+# Jupyter environment
+jupyter
 bash_kernel
-nltk
-tweepy
-kafka-python
