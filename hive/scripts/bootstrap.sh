@@ -5,9 +5,6 @@
 # dos containers/nodes.
 /etc/init.d/ssh start
 
-# Abaixo temos o trecho que rodará apenas no master.
-crontab /etc/cron.d/jobPersistMetaStore
-cron -f
 
 # Formatamos o namenode
 #hdfs namenode -format
@@ -24,7 +21,7 @@ SOURCE /usr/hive/scripts/metastore/upgrade/mysql/hive-schema-3.1.0.mysql.sql; \
 CREATE USER 'hive'@'localhost' IDENTIFIED BY 'password'; \
 REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'hive'@'localhost'; \
 GRANT ALL PRIVILEGES ON metastore.* TO 'hive'@'localhost'; \
-FLUSH PRIVILEGES; quit;"
+FLUSH PRIVILEGES;"
 
 #Persistindo dados anteriores do metastore
 mysql metastore < /hadoop_data/dump/metastore_dump
@@ -34,5 +31,10 @@ mysql metastore < /hadoop_data/dump/metastore_dump
 # não bloqueiem o shell
 nohup hive --service metastore > /dev/null 2>&1 &
 nohup hive --service hiveserver2 > /dev/null 2>&1 &
+
+
+# Abaixo temos o trecho que rodará apenas no master.
+crontab /etc/cron.d/jobPersistMetaStore
+cron -f
 
 while :; do sleep 2073600; done
