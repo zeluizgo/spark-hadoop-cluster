@@ -88,7 +88,7 @@ COPY /hive/config/hive/*.xml $HIVE_HOME/conf/
 # container estao aqui
 COPY /hive/scripts /
 COPY /hive/cron /etc/cron.d/
-RUN chmod 0644 /etc/cron.d/myjob
+RUN chmod 0644 /etc/cron.d/*
 
 # Portas 10000:10002 relativas ao Hiveserver2, 9999 webui do Hiveserver
 EXPOSE 22 9083 10000 10001 10002 9999 3306
