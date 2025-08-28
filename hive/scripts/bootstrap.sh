@@ -59,6 +59,13 @@ fi
 # ---------------------------
 mkdir -p /usr/hive/logs
 
+# Wait for MySQL to be ready
+until mysqladmin ping -h "localhost" --silent; do
+  echo "Waiting for MySQL..."
+  sleep 2
+done
+
+
 echo "Starting Hive Metastore..."
 nohup hive --service metastore > /usr/hive/logs/metastore.log 2>&1 &
 
