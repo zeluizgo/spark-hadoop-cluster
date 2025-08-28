@@ -6,7 +6,9 @@
 /etc/init.d/ssh start
 
 # Abaixo temos o trecho que rodará apenas no master.
-    
+crontab /etc/cron.d/jobPersistMetaStore
+cron -f
+
 # Formatamos o namenode
 #hdfs namenode -format
 
