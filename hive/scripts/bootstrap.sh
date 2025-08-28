@@ -30,9 +30,6 @@ else
     echo "Metastore database already exists. Skipping creation."
 fi
 
-#Persistindo dados anteriores do metastore
-mysql metastore < /hadoop_data/dump/metastore_dump
-
 # Inicio dos serviços do Hive. Nao recomendado: Redirecionamos
 # os outputs para uma localização inexistente para que as linhas
 # não bloqueiem o shell
@@ -43,5 +40,10 @@ nohup hive --service hiveserver2 > /dev/null 2>&1 &
 # Abaixo temos o trecho que rodará apenas no master.
 crontab /etc/cron.d/jobPersistMetaStore
 cron -f
+
+
+#Persistindo dados anteriores do metastore
+mysql metastore < /hadoop_data/dump/metastore_dump
+
 
 while :; do sleep 2073600; done
