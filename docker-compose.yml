@@ -75,6 +75,30 @@ services:
     deploy:
       placement:
         constraints: [node.role == manager]
+  spark-worker-3:
+    image: spark-hadoop-cluster:latest
+    container_name: spark-worker-3
+    hostname: spark-worker-3
+    tty: true
+    volumes:
+      - /media/data/hadoop:/hadoop_data
+      - etl_data:/glustervol1
+    depends_on:
+      - spark-master
+    ports:
+      - "8083:8081" # WebUI Spark worker
+      - "5042:8042" # NodeManager
+      - "4043:4040" # Spark
+    environment:
+      - "SPARK_LOCAL_IP=spark-worker-3"
+      - "SPARK_WORKER_WEBUI_PORT=8083"
+    networks:
+      cluster-network:
+        ipv4_address: 10.5.0.5
+    deploy:
+      placement:
+        constraints:
+          - node.labels.workerid == 3
   hive-server:
     image: hive-server:latest
     container_name: hive-server
@@ -90,7 +114,7 @@ services:
       - "3306:3306" # MySQL
     networks:
       cluster-network:
-        ipv4_address: 10.5.0.5
+        ipv4_address: 10.5.0.6
     deploy:
       placement:
         constraints:
@@ -108,7 +132,7 @@ services:
       - "8888:8888" # Jupyter
     networks:
       cluster-network:
-        ipv4_address: 10.5.0.6
+        ipv4_address: 10.5.0.7
     deploy:
       placement:
         constraints:
