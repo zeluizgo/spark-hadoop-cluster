@@ -60,6 +60,7 @@ services:
     volumes:
       - /media/data/hadoop:/hadoop_data
       - etl_data:/glustervol1
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     depends_on:
       - spark-master
     ports:
