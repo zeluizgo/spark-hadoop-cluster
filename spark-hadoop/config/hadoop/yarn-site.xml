@@ -41,4 +41,12 @@
                 <name>yarn.nodemanager.disk-health-checker.max-disk-utilization-per-disk-percentage</name>
                 <value>99.0</value>
         </property>
+        <property>
+                <name>yarn.nodemanager.container-metrics.enable</name>
+                <value>false</value>
+        </property>
+        <property>
+                <name>yarn.nodemanager.linux-container-executor.cgroups.mount</name>
+                <value>false</value>
+        </property>
 </configuration>
