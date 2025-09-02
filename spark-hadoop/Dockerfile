@@ -35,6 +35,7 @@ ENV SPARK_MASTER_PORT 7077
 
 ENV SPARK_WORKER_WEBUI_PORT 8081
 ENV SPARK_MASTER spark://$SPARK_MASTER_HOST:$SPARK_MASTER_PORT
+ENV SPARK_MASTER_URL spark://$SPARK_MASTER_HOST:$SPARK_MASTER_PORT
 ENV SPARK_WORKER_LOG /spark/logs
 ENV YARN_CONF_DIR $HADOOP_CONF_DIR
 
@@ -125,18 +126,30 @@ EXPOSE 9000 4040 8020 22 8080 7077 8081
 EXPOSE 8088 6066 7001 8030 8031 8032 2181 2888 3888  
 
 # … your existing layers …
+# JVM options for all Hadoop daemons
+ENV HADOOP_OPTS="\
+  -XX:+UseContainerSupport \
+  -XX:MaxRAMPercentage=80.0 \
+  -Dcom.sun.management.jmxremote \
+  --add-opens java.base/java.lang=ALL-UNNAMED \
+  --add-opens java.base/java.util=ALL-UNNAMED \
+  --add-opens java.base/sun.nio.ch=ALL-UNNAMED"
 
-# 1. Define JVM flags via ENV
-ENV HADOOP_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"
-ENV YARN_RESOURCEMANAGER_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"
+# Service-specific: only if you really need
+# ENV YARN_RESOURCEMANAGER_OPTS="$HADOOP_OPTS"
+# ENV YARN_NODEMANAGER_OPTS="$HADOOP_OPTS"
 
-# 2. (Optional) Or patch the scripts directly
+
+# Patch hadoop-env.sh and yarn-env.sh to *append* options from ENV
 RUN sed -i '/^# *export HADOOP_OPTS=/a \
-export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
-      $HADOOP_HOME/etc/hadoop/hadoop-env.sh && \
+export HADOOP_OPTS="$HADOOP_OPTS"' \
+    $HADOOP_HOME/etc/hadoop/hadoop-env.sh && \
     sed -i '/^# *export YARN_RESOURCEMANAGER_OPTS=/a \
-export YARN_RESOURCEMANAGER_OPTS="$YARN_RESOURCEMANAGER_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
-      $HADOOP_HOME/etc/hadoop/yarn-env.sh
+export YARN_RESOURCEMANAGER_OPTS="$HADOOP_OPTS"' \
+    $HADOOP_HOME/etc/hadoop/yarn-env.sh && \
+    sed -i '/^# *export YARN_NODEMANAGER_OPTS=/a \
+export YARN_NODEMANAGER_OPTS="$HADOOP_OPTS"' \
+    $HADOOP_HOME/etc/hadoop/yarn-env.sh
 
 # Algumas configuracoes adicionais e inicio de alguns servicoes que devem ser feitos em
 # tempo de execucao estao presentes no script bootstrap.
