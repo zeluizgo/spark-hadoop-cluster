@@ -70,6 +70,9 @@ services:
     environment:
       - "SPARK_LOCAL_IP=spark-worker-2"
       - "SPARK_WORKER_WEBUI_PORT=8081"
+      - "HADOOP_OPTS=  -XX:+UseContainerSupport -XX:MaxRAMPercentage=80.0 -Dcom.sun.management.jmxremote --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED"
+      - "YARN_RESOURCEMANAGER_OPTS=  -XX:+UseContainerSupport -XX:MaxRAMPercentage=80.0 -Dcom.sun.management.jmxremote --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED"
+      - "YARN_NODEMANAGER_OPTS=  -XX:+UseContainerSupport -XX:MaxRAMPercentage=80.0 -Dcom.sun.management.jmxremote --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED"
     networks:
       cluster-network:
         ipv4_address: 10.5.0.4
