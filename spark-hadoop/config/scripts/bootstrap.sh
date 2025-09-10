@@ -35,7 +35,7 @@ if [[ $HOSTNAME = spark-master ]]; then
 
     # Iniciamos o history server do Spark
     #$SPARK_HOME/sbin/start-history-server.sh
-    $SPARK_HOME/bin/spark-class org.apache.spark.deploy.history.HistoryServer
+    $SPARK_HOME/bin/spark-class org.apache.spark.deploy.history.HistoryServer &
 
 # E abaixo temos o trecho que rodará nos workers
 else
