@@ -1,5 +1,9 @@
 FROM openjdk:17-slim
 
+# Variaveis de ambiente do Scala
+ENV SCALA_VERSION 2.12.18
+ENV SCALA_HOME /usr/scala
+
 # Variaveis de ambiente do Hadoop
 ENV HADOOP_VERSION 3.3.5
 ENV HADOOP_MINOR_VERSION 3
@@ -14,7 +18,7 @@ ENV HIVE_PORT 10000
 ENV CLASSPATH=$HIVE_HOME/lib
 
 # Variaveis de ambiente do Spark
-ENV SPARK_VERSION 3.4.1
+ENV SPARK_VERSION 3.5.0
 ENV SPARK_HOME /usr/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}
 ENV SPARK_DIST_CLASSPATH="$HADOOP_HOME/etc/hadoop/*:$HADOOP_HOME/share/hadoop/common/lib/*:$HADOOP_HOME/share/hadoop/common/*:$HADOOP_HOME/share/hadoop/hdfs/*:$HADOOP_HOME/share/hadoop/hdfs/lib/*:$HADOOP_HOME/share/hadoop/hdfs/*:$HADOOP_HOME/share/hadoop/yarn/lib/*:$HADOOP_HOME/share/hadoop/yarn/*:$HADOOP_HOME/share/hadoop/mapreduce/lib/*:$HADOOP_HOME/share/hadoop/mapreduce/*:$HADOOP_HOME/share/hadoop/tools/lib/*"
 ENV SPARK_CONF_DIR $SPARK_HOME/conf
@@ -46,9 +50,13 @@ ENV HDFS_SECONDARYNAMENODE_USER root
 ENV YARN_RESOURCEMANAGER_USER root
 ENV YARN_NODEMANAGER_USER root
 
+
+# Set JAVA_HOME
+ENV JAVA_HOME=/usr/local/openjdk-17
+
 # Adicao de valores aos paths abaixo para que os componentes os localizem
 ENV PYTHONPATH $SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.7-src.zip:/usr/bin/python3
-ENV PATH $PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$SPARK_HOME/bin:$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.7-src.zip:$PYTHONPATH:$HIVE_HOME/bin
+ENV PATH $PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$SPARK_HOME/bin:$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.7-src.zip:$PYTHONPATH:$HIVE_HOME/bin:$SCALA_HOME/bin
 
 # Install dependencies
 RUN apt-get update && apt-get install -y curl gnupg2 ca-certificates
@@ -77,6 +85,13 @@ RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
     chmod 600 ~/.ssh/authorized_keys
 COPY /config/config /root/.ssh
 RUN chmod 600 /root/.ssh/config
+
+# Install Scala 2.12
+RUN wget https://downloads.lightbend.com/scala/${SCALA_VERSION}/scala-${SCALA_VERSION}.tgz && \
+    tar zxvf scala-${SCALA_VERSION}.tgz -C /usr/ && \
+    rm scala-${SCALA_VERSION}.tgz && \
+    mv /usr/scala-${SCALA_VERSION} /usr/scala && \
+    ln -s /usr/scala/bin/* /usr/bin/
 
     # Hadoop
 RUN wget \
@@ -118,13 +133,6 @@ COPY config/spark ${SPARK_HOME}/conf/
 COPY config/hadoop/*.xml /usr/hadoop-${HADOOP_VERSION}/etc/hadoop/
 COPY config/scripts /
 
-# Porta nodeManager SPark 8042, Porta 9870 NameNode Hadoop  Porta 18080 Spark History Server 
-EXPOSE 8042 9870 18080
-# Portas Hadoop: 9000 / Spark: 4040, 8080 7077 
-EXPOSE 9000 4040 8020 22 8080 7077 8081
-# Portas Spark/yarn 8088
-EXPOSE 8088 6066 7001 8030 8031 8032 2181 2888 3888  
-
 # … your existing layers …
 
 # 1. Define JVM flags via ENV
@@ -142,6 +150,12 @@ export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' 
 export YARN_RESOURCEMANAGER_OPTS="$YARN_RESOURCEMANAGER_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
       $HADOOP_HOME/etc/hadoop/yarn-env.sh
 
+
+# Expose ports
+EXPOSE 8042 9870 18080 9000 4040 8020 22 8080 7077 8081 8088 6066 7001 8030 8031 8032 2181 2888 3888 10000
+
+# Clean up
+RUN apt-get remove -y wget unzip && apt-get autoremove -y && apt-get clean
 # Algumas configuracoes adicionais e inicio de alguns servicoes que devem ser feitos em
 # tempo de execucao estao presentes no script bootstrap.
 # Este cuidará de colocar alguns datasets exemplo dentro do HDFS, bem como de iniciar 
