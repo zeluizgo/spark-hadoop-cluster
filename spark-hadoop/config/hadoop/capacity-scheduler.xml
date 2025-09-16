@@ -76,9 +76,21 @@
     <name>yarn.scheduler.capacity.root.spring.maximum-am-resource-percent</name>
     <value>0.2</value>
   </property>
+
+  <!-- Hard cap: no app in spring queue can exceed 1024 MB -->
+  <property>
+    <name>yarn.scheduler.capacity.root.spring.maximum-allocation-mb</name>
+    <value>2048</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.capacity.root.spark.maximum-allocation-vcores</name>
+    <value>2</value>
+  </property>
+
+
   <property>
     <name>yarn.scheduler.capacity.root.default.capacity</name>
-    <value>100</value>
+    <value>0</value>
     <description>Default queue target capacity.</description>
   </property>
 
@@ -92,7 +104,7 @@
 
   <property>
     <name>yarn.scheduler.capacity.root.default.maximum-capacity</name>
-    <value>0</value>
+    <value>100</value>
     <description>
       The maximum capacity of the default queue. 
     </description>
