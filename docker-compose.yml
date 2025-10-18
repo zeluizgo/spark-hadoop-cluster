@@ -25,7 +25,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.workerid == 1
+          - node.labels.workerid == 3
     extra_hosts:
       - "spark:10.5.0.2"
   spark-worker-1:
@@ -101,7 +101,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.workerid == 3
+          - node.labels.workerid == 1
   hive-server:
     image: hive-server:latest
     container_name: hive-server
