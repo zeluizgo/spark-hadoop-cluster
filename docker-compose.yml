@@ -9,6 +9,7 @@ services:
       - /home/ubuntu/projects:/user_data
       - /media/data/hadoop:/hadoop_data
       - etl_data:/glustervol1
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     ports:
       - "8088:8088" # ResourceManager
       - "9870:9870" # NameNode WebUI
@@ -22,6 +23,7 @@ services:
         ipv4_address: 10.5.0.2
     environment:
       - "SPARK_LOCAL_IP=spark-master"
+      - "JAVA_TOOL_OPTIONS=-XX:-UseContainerSupport"
     deploy:
       placement:
         constraints:
