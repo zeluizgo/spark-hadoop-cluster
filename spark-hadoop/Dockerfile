@@ -1,155 +1,146 @@
 FROM openjdk:17-slim
 
-# Variaveis de ambiente do Scala
-ENV SCALA_VERSION 2.12.18
-ENV SCALA_HOME /usr/scala
 
-# Variaveis de ambiente do Hadoop
-ENV HADOOP_VERSION 3.3.5
-ENV HADOOP_MINOR_VERSION 3
-ENV HADOOP_HOME /usr/hadoop-$HADOOP_VERSION
-ENV HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
-
-# Variaveis de ambiente do Hive
-ENV HIVE_VERSION 3.1.3
-ENV HIVE_HOME=/usr/hive
-ENV HIVE_PORT 10000
-# Classpath para localizar os jars com as classes necessarias
-ENV CLASSPATH=$HIVE_HOME/lib
-
-# Variaveis de ambiente do Spark
-ENV SPARK_VERSION 3.5.0
-ENV SPARK_HOME /usr/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}
-ENV SPARK_DIST_CLASSPATH="$HADOOP_HOME/etc/hadoop/*:$HADOOP_HOME/share/hadoop/common/lib/*:$HADOOP_HOME/share/hadoop/common/*:$HADOOP_HOME/share/hadoop/hdfs/*:$HADOOP_HOME/share/hadoop/hdfs/lib/*:$HADOOP_HOME/share/hadoop/hdfs/*:$HADOOP_HOME/share/hadoop/yarn/lib/*:$HADOOP_HOME/share/hadoop/yarn/*:$HADOOP_HOME/share/hadoop/mapreduce/lib/*:$HADOOP_HOME/share/hadoop/mapreduce/*:$HADOOP_HOME/share/hadoop/tools/lib/*"
-ENV SPARK_CONF_DIR $SPARK_HOME/conf
-
-# Configuracoes do pyspark
-ENV PYSPARK_PYTHON python3
-
-# Usar python3 para modo cluster, e jupyter + configuracao de PYSPARK_DRIVER_PYTHON_OPTS='notebook'
-# para modo interativo
-ENV PYSPARK_DRIVER_PYTHON=python3
-# ENV PYSPARK_DRIVER_PYTHON=jupyter
-# ENV PYSPARK_DRIVER_PYTHON_OPTS='notebook'
-
-ENV SPARK_MASTER_WEBUI_PORT 8080
-ENV SPARK_MASTER_LOG /spark/logs
-ENV SPARK_MASTER_HOST spark-master
-ENV SPARK_MASTER_PORT 7077
-
-ENV SPARK_WORKER_WEBUI_PORT 8081
-ENV SPARK_MASTER spark://$SPARK_MASTER_HOST:$SPARK_MASTER_PORT
-ENV SPARK_MASTER_URL spark://$SPARK_MASTER_HOST:$SPARK_MASTER_PORT
-ENV SPARK_WORKER_LOG /spark/logs
-ENV YARN_CONF_DIR $HADOOP_CONF_DIR
-
-ENV HDFS_DATANODE_USER root
-ENV HADOOP_SECURE_DN_USER root 
-ENV HDFS_NAMENODE_USER root 
-ENV HDFS_SECONDARYNAMENODE_USER root 
-ENV YARN_RESOURCEMANAGER_USER root
-ENV YARN_NODEMANAGER_USER root
+# ---------- Versions ----------
+ENV SCALA_VERSION=2.12.18
+ENV HADOOP_VERSION=3.3.5
+ENV HADOOP_MINOR_VERSION=3
+ENV HIVE_VERSION=3.1.3
+ENV SPARK_VERSION=3.5.0
 
 
-# Set JAVA_HOME
+# ---------- Core Paths ----------
 ENV JAVA_HOME=/usr/local/openjdk-17
+ENV SCALA_HOME=/usr/scala
+ENV HADOOP_HOME=/usr/hadoop-${HADOOP_VERSION}
+ENV HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop
+ENV HIVE_HOME=/usr/hive
+ENV SPARK_HOME=/usr/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}
+ENV SPARK_CONF_DIR=${SPARK_HOME}/conf
+ENV CLASSPATH=${HIVE_HOME}/lib
+ENV PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$SPARK_HOME/bin:$HIVE_HOME/bin:$SCALA_HOME/bin
+ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9.7-src.zip
 
-# Adicao de valores aos paths abaixo para que os componentes os localizem
-ENV PYTHONPATH $SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.7-src.zip:/usr/bin/python3
-ENV PATH $PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$SPARK_HOME/bin:$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.7-src.zip:$PYTHONPATH:$HIVE_HOME/bin:$SCALA_HOME/bin
 
-# Install dependencies
-RUN apt-get update && apt-get install -y curl gnupg2 ca-certificates
+# ---------- Spark Environment ----------
+ENV SPARK_MASTER_WEBUI_PORT=8080
+ENV SPARK_MASTER_HOST=spark-master
+ENV SPARK_MASTER_PORT=7077
+ENV SPARK_MASTER_URL=spark://$SPARK_MASTER_HOST:$SPARK_MASTER_PORT
+ENV SPARK_MASTER=$SPARK_MASTER_URL
+ENV SPARK_MASTER_LOG=/spark/logs
+ENV SPARK_WORKER_WEBUI_PORT=8081
+ENV SPARK_WORKER_LOG=/spark/logs
+ENV PYSPARK_PYTHON=python3
+ENV PYSPARK_DRIVER_PYTHON=python3
 
-# Install Python 3.9
-RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-pip python3-dev gcc
 
-# Install Python 3.11
-#RUN apt-get install -y python3.11 python3-pip \
-#    ln -s /usr/bin/python3.11 /usr/bin/python \
-#    ln -s /usr/bin/python3.11 /usr/bin/python3 
+# ---------- Hadoop/HDFS Users ----------
+ENV HDFS_DATANODE_USER=root
+ENV HDFS_DATANODE_SECURE_USER=root
+ENV HDFS_NAMENODE_USER=root
+ENV HDFS_SECONDARYNAMENODE_USER=root
+ENV YARN_RESOURCEMANAGER_USER=root
+ENV YARN_NODEMANAGER_USER=root
 
+
+# ---------- JVM Options ----------
+ENV HADOOP_OPTS="-XX:+IgnoreUnrecognizedVMOptions -XX:-UseContainerSupport \
+ --add-opens=java.base/java.lang=ALL-UNNAMED \
+ --add-opens=java.base/java.lang.reflect=ALL-UNNAMED \
+ --add-opens=java.base/java.io=ALL-UNNAMED \
+ --add-opens=java.base/java.net=ALL-UNNAMED \
+ --add-opens=java.base/java.nio=ALL-UNNAMED \
+ --add-opens=java.base/sun.nio.ch=ALL-UNNAMED \
+ --add-opens=java.base/java.util=ALL-UNNAMED \
+ --add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED"
+
+
+# ---------- Dependencies ----------
+RUN apt-get update && \
+    apt-get install -y curl gnupg2 ca-certificates ssh openssh-server wget rsync python3 python3-pip python3-dev gcc && \
+    apt-get clean
+
+
+
+# ---------- Python dependencies ----------
 COPY /config/jupyter/requirements.txt /
+RUN python3 -m pip install --upgrade pip && \
+    python3 -m pip install -r requirements.txt && \
+    python3 -m pip install --upgrade dask[bag] toree bash_kernel
 
-RUN python3 -m pip install -r requirements.txt  --upgrade \
-    && python3 -m pip install dask[bag] --upgrade \
-    && python3 -m pip install --upgrade toree \
-    && python3 -m pip install bash_kernel
-    
-# Install ssh
-RUN apt-get update && apt-get install -y --no-install-recommends ssh openssh-server wget rsync
 
-# Keys dos nodes. Necessarias para se comunicarem por SSH
-RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
-    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
-    chmod 600 ~/.ssh/authorized_keys
-COPY /config/config /root/.ssh
+
+# ---------- SSH setup ----------
+RUN mkdir -p /root/.ssh && \
+    ssh-keygen -t rsa -P '' -f /root/.ssh/id_rsa && \
+    cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys && \
+    chmod 700 /root/.ssh && \
+    chmod 600 /root/.ssh/authorized_keys
+COPY /config/config /root/.ssh/config
 RUN chmod 600 /root/.ssh/config
 
-# Install Scala 2.12
+
+
+# ---------- Scala ----------
 RUN wget https://downloads.lightbend.com/scala/${SCALA_VERSION}/scala-${SCALA_VERSION}.tgz && \
     tar zxvf scala-${SCALA_VERSION}.tgz -C /usr/ && \
     rm scala-${SCALA_VERSION}.tgz && \
     mv /usr/scala-${SCALA_VERSION} /usr/scala && \
     ln -s /usr/scala/bin/* /usr/bin/
 
-    # Hadoop
-RUN wget \
-    "http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" \
-    && tar zvxf hadoop-${HADOOP_VERSION}.tar.gz -C /usr/ \
-    && rm hadoop-${HADOOP_VERSION}.tar.gz \
-    && rm -rf ${HADOOP_HOME}/share/doc \
-    && chown -R root:root ${HADOOP_HOME} \
-    # Spark
-    && wget \
-    "http://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}.tgz" \
-    && tar zvxf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}.tgz -C /usr/ \
-    && rm spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}.tgz \
-    && chown -R root:root ${SPARK_HOME} \
-    # Hive
-    && wget \
-    https://archive.apache.org/dist/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz \
-    && tar zxvf apache-hive-${HIVE_VERSION}-bin.tar.gz \
-    && rm apache-hive-${HIVE_VERSION}-bin.tar.gz \
-    && mv apache-hive-${HIVE_VERSION}-bin ${HIVE_HOME} \
-    && cp ${HIVE_HOME}/conf/hive-env.sh.template ${HIVE_HOME}/conf/hive-env.sh \
-    && echo "export HADOOP_HOME=/usr/hadoop-${HADOOP_VERSION}/" >> ${HIVE_HOME}/conf/hive-env.sh \
+
+# ---------- Hadoop, Spark, Hive ----------
+         # Hadoop
+RUN wget http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz && \
+    tar zxvf hadoop-${HADOOP_VERSION}.tar.gz -C /usr/ && \
+    rm hadoop-${HADOOP_VERSION}.tar.gz && \
+    rm -rf ${HADOOP_HOME}/share/doc && \
+    chown -R root:root ${HADOOP_HOME} && \
+         # Spark
+    wget http://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}.tgz && \
+    tar zxvf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}.tgz -C /usr/ && \
+    rm spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}.tgz && \
+    chown -R root:root ${SPARK_HOME} && \
+        # Hive
+    wget https://archive.apache.org/dist/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz && \
+    tar zxvf apache-hive-${HIVE_VERSION}-bin.tar.gz && \
+    rm apache-hive-${HIVE_VERSION}-bin.tar.gz && \
+    mv apache-hive-${HIVE_VERSION}-bin ${HIVE_HOME} && \
+    cp ${HIVE_HOME}/conf/hive-env.sh.template ${HIVE_HOME}/conf/hive-env.sh && \
+    echo "export HADOOP_HOME=${HADOOP_HOME}" >> ${HIVE_HOME}/conf/hive-env.sh && \
     # Configurando o conector do metastore do Hive
-    && ln -s /usr/share/java/mariadb-java-client.jar ${HIVE_HOME}/lib/mariadb-java-client.jar \
+    ln -s /usr/share/java/mariadb-java-client.jar ${HIVE_HOME}/lib/mariadb-java-client.jar && \
     # Criando diretório para jars externos do Hive e baixando suporte a parquet
-    && wget https://repo1.maven.org/maven2/com/twitter/parquet-avro/1.2.5/parquet-avro-1.2.5.jar -P /usr/hive/aux_jars/ \
-    && wget https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar -P /usr/hive/lib/ \
-    # Configurando o JAVA_HOME para os processos localizarem a instalação do Java
-    && echo "export JAVA_HOME=${JAVA_HOME}" >> /etc/environment
+    mkdir -p /usr/hive/aux_jars && \
+    wget https://repo1.maven.org/maven2/com/twitter/parquet-avro/1.2.5/parquet-avro-1.2.5.jar -P /usr/hive/aux_jars/ && \
+    wget https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar -P /usr/hive/lib/
 
-COPY config/hive/*.xml $SPARK_HOME/conf/
 
-COPY config/hadoop/masters $HADOOP_HOME/conf/
-COPY config/hadoop/slaves $HADOOP_HOME/conf/
-
-# Todos os arquivos de configuracao que devem ser copiados para dentro do
-# container estao aqui
+  
+# ---------- Config files ----------
+COPY config/hive/*.xml ${SPARK_HOME}/conf/
+COPY config/hadoop/masters ${HADOOP_CONF_DIR}/
+COPY config/hadoop/slaves ${HADOOP_CONF_DIR}/
 COPY config/spark ${SPARK_HOME}/conf/
-COPY config/hadoop/*.xml /usr/hadoop-${HADOOP_VERSION}/etc/hadoop/
+COPY config/hadoop/*.xml ${HADOOP_CONF_DIR}/
 COPY config/scripts /
 
-# … your existing layers …
 
-# 1. Define JVM flags via ENV
-ENV HADOOP_OPTS="-XX:+IgnoreUnrecognizedVMOptions -XX:-UseContainerSupport --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED   --add-opens=java.base/java.io=ALL-UNNAMED  --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED   --add-opens=java.base/sun.nio.ch=ALL-UNNAMED   --add-opens=java.base/java.util=ALL-UNNAMED   --add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED"
 
-ENV YARN_OPTS="-XX:+IgnoreUnrecognizedVMOptions -XX:-UseContainerSupport --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED"
+#ENV YARN_OPTS="-XX:+IgnoreUnrecognizedVMOptions -XX:-UseContainerSupport --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED"
 
-ENV YARN_RESOURCEMANAGER_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"
+#ENV YARN_RESOURCEMANAGER_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"
 
-# 2. (Optional) Or patch the scripts directly
+
+
+# ---------- Apply add-opens patches directly ----------
 RUN sed -i '/^# *export HADOOP_OPTS=/a \
 export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
-      $HADOOP_HOME/etc/hadoop/hadoop-env.sh && \
+      $HADOOP_CONF_DIR/hadoop-env.sh && \
     sed -i '/^# *export YARN_RESOURCEMANAGER_OPTS=/a \
 export YARN_RESOURCEMANAGER_OPTS="$YARN_RESOURCEMANAGER_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
-      $HADOOP_HOME/etc/hadoop/yarn-env.sh
-
+      $HADOOP_CONF_DIR/yarn-env.sh
 
 # Expose ports
 EXPOSE 8042 9870 18080 9000 4040 8020 22 8080 7077 8081 8088 6066 7001 8030 8031 8032 2181 2888 3888 10000
