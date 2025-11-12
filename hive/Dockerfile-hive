@@ -1,4 +1,4 @@
-FROM openjdk:17-slim
+FROM --platform=linux/arm64 eclipse-temurin:17-jdk-jammy
 
 # Variaveis de ambiente do Hadoop
 ENV HADOOP_VERSION 3.3.5

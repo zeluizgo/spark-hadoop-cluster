@@ -1,5 +1,4 @@
-FROM openjdk:17-slim
-
+FROM --platform=linux/arm64 eclipse-temurin:17-jdk-jammy
 
 # Configuracoes do pyspark
 ENV PYSPARK_PYTHON python3
