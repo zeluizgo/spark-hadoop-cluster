@@ -10,7 +10,8 @@ ENV SPARK_VERSION=3.5.0
 
 
 # ---------- Core Paths ----------
-ENV JAVA_HOME=/usr/local/openjdk-17
+#ENV JAVA_HOME=/usr/local/openjdk-17
+ENV JAVA_HOME=/opt/java/openjdk
 ENV SCALA_HOME=/usr/scala
 ENV HADOOP_HOME=/usr/hadoop-${HADOOP_VERSION}
 ENV HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop
