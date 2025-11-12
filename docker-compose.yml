@@ -22,6 +22,7 @@ services:
         ipv4_address: 10.5.0.2
     environment:
       - "SPARK_LOCAL_IP=spark-master"
+      - "JAVA_HOME=/opt/java/openjdk"
     deploy:
       placement:
         constraints:
@@ -45,6 +46,7 @@ services:
     environment:
       - "SPARK_LOCAL_IP=spark-worker-1"
       - "SPARK_WORKER_WEBUI_PORT=8081"
+      - "JAVA_HOME=/opt/java/openjdk"
     networks:
       cluster-network:
         ipv4_address: 10.5.0.3
@@ -70,6 +72,7 @@ services:
     environment:
       - "SPARK_LOCAL_IP=spark-worker-2"
       - "SPARK_WORKER_WEBUI_PORT=8081"
+      - "JAVA_HOME=/opt/java/openjdk"
       - "HADOOP_OPTS=-XX:+IgnoreUnrecognizedVMOptions -XX:-UseContainerSupport --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED   --add-opens=java.base/java.io=ALL-UNNAMED  --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED   --add-opens=java.base/sun.nio.ch=ALL-UNNAMED   --add-opens=java.base/java.util=ALL-UNNAMED   --add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED"
       - "YARN_OPTS=-XX:+IgnoreUnrecognizedVMOptions -XX:-UseContainerSupport --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED   --add-opens=java.base/java.io=ALL-UNNAMED  --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED   --add-opens=java.base/sun.nio.ch=ALL-UNNAMED   --add-opens=java.base/java.util=ALL-UNNAMED   --add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED"
     networks:
@@ -96,6 +99,7 @@ services:
     environment:
       - "SPARK_LOCAL_IP=spark-worker-3"
       - "SPARK_WORKER_WEBUI_PORT=8083"
+      - "JAVA_HOME=/opt/java/openjdk"
     networks:
       cluster-network:
         ipv4_address: 10.5.0.5
