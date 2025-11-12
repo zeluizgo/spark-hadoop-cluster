@@ -114,10 +114,23 @@ RUN wget http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/h
     # Criando diretório para jars externos do Hive e baixando suporte a parquet
     mkdir -p /usr/hive/aux_jars && \
     wget https://repo1.maven.org/maven2/com/twitter/parquet-avro/1.2.5/parquet-avro-1.2.5.jar -P /usr/hive/aux_jars/ && \
-    wget https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar -P /usr/hive/lib/
+    wget https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar -P /usr/hive/lib/ \
 
+    # --------- Replace Spark’s Hive 2.x jars with Hive 3.1.3 ---------
+    echo "Removing Hive 2.x jars from Spark and adding Hive 3.1.3..." && \
+    mkdir -p ${SPARK_HOME}/hive3-lib && \
+    find ${SPARK_HOME}/jars -type f -name "hive-*.jar" -exec mv {} ${SPARK_HOME}/hive3-lib/ \; && \
+    find ${SPARK_HOME}/jars -type f -name "hive-shims-*.jar" -exec mv {} ${SPARK_HOME}/hive3-lib/ \; && \
+    find ${SPARK_HOME}/jars -type f -name "hive-*.jar.disabled" -delete; \
+    \
+    # Copy Hive 3.1.3 jars into Spark’s classpath
+    cp ${HIVE_HOME}/lib/hive-*.jar ${SPARK_HOME}/jars/; \
+    cp ${HIVE_HOME}/lib/libfb303*.jar ${SPARK_HOME}/jars/ || true; \
+    cp ${HIVE_HOME}/lib/libthrift*.jar ${SPARK_HOME}/jars/ || true; \
+    \
+    # Clean permissions
+    chown -R root:root ${HIVE_HOME} ${SPARK_HOME}
 
-  
 # ---------- Config files ----------
 COPY config/hive/*.xml ${SPARK_HOME}/conf/
 COPY config/hadoop/masters ${HADOOP_CONF_DIR}/
@@ -127,11 +140,9 @@ COPY config/hadoop/*.xml ${HADOOP_CONF_DIR}/
 COPY config/scripts /
 
 
-
 #ENV YARN_OPTS="-XX:+IgnoreUnrecognizedVMOptions -XX:-UseContainerSupport --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED"
 
 #ENV YARN_RESOURCEMANAGER_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"
-
 
 
 # ---------- Apply add-opens patches directly ----------
