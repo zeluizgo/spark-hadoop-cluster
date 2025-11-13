@@ -132,7 +132,7 @@ RUN wget http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/h
     # Clean permissions
     chown -R root:root ${HIVE_HOME} ${SPARK_HOME}
 
-RUN echo "export JAVA_HOME=/usr/local/openjdk-17" >> /usr/hadoop-${HADOOP_VERSION}/etc/hadoop/hadoop-env.sh
+RUN echo "export JAVA_HOME=/opt/java/openjdk" >> /usr/hadoop-${HADOOP_VERSION}/etc/hadoop/hadoop-env.sh
 
 
 # ---------- Config files ----------
