@@ -80,11 +80,6 @@
         </property>
 
         <property>
-            <name>hive.server2.thrift.bind.host</name>
-            <value>localhost</value> 
-        </property>
-
-        <property>
             <name>hive.metastore.event.db.notification.api.auth</name>
             <value>false</value> 
         </property>
