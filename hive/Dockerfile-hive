@@ -81,6 +81,11 @@ RUN wget \
     # Configurando o JAVA_HOME para os processos localizarem a instalação do Java
     && echo "export JAVA_HOME=${JAVA_HOME}" >> /etc/environment
 
+
+# Instalando o netcat-openbsd para permitir o uso do comando nc
+RUN apt-get update && apt-get install -y netcat-openbsd && apt-get clean
+
+# Copia os arquivos de configuracao do Hadoop para dentro do container
 COPY /hive/config/hive/*.xml $HIVE_HOME/conf/
 
 

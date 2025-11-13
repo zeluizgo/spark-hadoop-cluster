@@ -4,9 +4,9 @@
 
         <property>
             <name>javax.jdo.option.ConnectionURL</name>
-            <value>jdbc:mysql://localhost:3306/metastore?createDatabaseIfNotExist=true&amp;useSSL=false&amp;serverTimezone=UTC</value>
-            <description>the URL of the MySQL database</description>
+            <value>jdbc:mysql://localhost:3306/metastore?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false</value>
         </property>
+
 
         <property>
             <name>javax.jdo.option.ConnectionDriverName</name>

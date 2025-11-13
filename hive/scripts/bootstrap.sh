@@ -94,11 +94,21 @@ mkdir -p /usr/hive/logs
 echo "Starting Hive Metastore..."
 nohup hive --service metastore > /usr/hive/logs/metastore.log 2>&1 &
 
-# Wait a few seconds for Metastore to be fully ready
-sleep 5
+# Wait until metastore responds on port 9083
+echo "Waiting for Hive Metastore to be ready..."
+for i in {1..30}; do
+  if nc -z localhost 9083; then
+    echo "Hive Metastore is up!"
+    break
+  fi
+  echo "Metastore not ready yet... ($i)"
+  sleep 3
+done
+
 
 echo "Starting HiveServer2..."
 nohup hive --service hiveserver2 > /usr/hive/logs/hiveserver2.log 2>&1 &
+
 
 
 # ---------------------------
