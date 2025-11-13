@@ -6,15 +6,40 @@
 /etc/init.d/ssh start
 
 # ---------------------------
+# Initialize MySQL data directory if missing
+# ---------------------------
+if [ ! -d "/var/lib/mysql/mysql" ]; then
+    echo "Initializing MySQL data directory..."
+    mysqld --initialize-insecure --user=mysql
+else
+    echo "MySQL data directory already initialized."
+fi
+
+# ---------------------------
 # Start MySQL (MariaDB)
 # ---------------------------
-service mariadb start
+#service mariadb start
+# ---------------------------
+# Start MySQL (MariaDB) manually in background
+# ---------------------------
+echo "Starting MariaDB manually..."
+/usr/sbin/mysqld --user=mysql --skip-networking=0 --bind-address=0.0.0.0 &
+MYSQL_PID=$!
 
 # Wait until MySQL is ready
-until mysqladmin ping -u root --silent; do
-    echo "Waiting for MySQL..."
+#until mysqladmin ping -u root --silent; do
+#    echo "Waiting for MySQL..."
+#    sleep 2
+#done
+# ---------------------------
+# Wait until MySQL is ready
+# ---------------------------
+echo "Waiting for MySQL to accept connections..."
+until mysqladmin ping -h "127.0.0.1" --silent >/dev/null 2>&1; do
+    echo "  ...still waiting for MySQL..."
     sleep 2
 done
+echo "✅ MySQL is up and responding."
 
 # ---------------------------
 # Create Metastore DB if missing
@@ -60,10 +85,10 @@ fi
 mkdir -p /usr/hive/logs
 
 # Wait for MySQL to be ready
-until mysqladmin ping -h "localhost" --silent; do
-  echo "Waiting for MySQL..."
-  sleep 2
-done
+#until mysqladmin ping -h "localhost" --silent; do
+#  echo "Waiting for MySQL..."
+#  sleep 2
+#done
 
 
 echo "Starting Hive Metastore..."
@@ -75,13 +100,21 @@ sleep 5
 echo "Starting HiveServer2..."
 nohup hive --service hiveserver2 > /usr/hive/logs/hiveserver2.log 2>&1 &
 
+
 # ---------------------------
 # Load cron jobs
 # ---------------------------
-crontab /etc/cron.d/jobPersistMetaStore
-cron
+if [ -f /etc/cron.d/jobPersistMetaStore ]; then
+    echo "Loading cron job for metastore persistence..."
+    crontab /etc/cron.d/jobPersistMetaStore
+    cron
+else
+    echo "No cron job file found at /etc/cron.d/jobPersistMetaStore"
+fi
 
 # ---------------------------
 # Keep container alive
 # ---------------------------
+echo "Hive container initialized successfully. Keeping alive..."
+wait $MYSQL_PID &
 tail -f /dev/null
