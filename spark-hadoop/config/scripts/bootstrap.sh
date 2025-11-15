@@ -19,6 +19,13 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
     $HADOOP_HOME/sbin/start-dfs.sh
     $HADOOP_HOME/sbin/start-yarn.sh
 
+    sleep 5
+
+    # Start Spark Master (only because you want WebUI — YARN will be used for jobs)
+    $SPARK_HOME/sbin/start-master.sh
+    
+    sleep 10
+
     # Create required HDFS directories
     hdfs dfs -mkdir -p /datasets \
                      /datasets_processed \
@@ -27,9 +34,6 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
 
     # Upload Spark libraries for YARN
     hdfs dfs -put -f $SPARK_HOME/jars/* /shared-libs/
-
-    # Start Spark Master (only because you want WebUI — YARN will be used for jobs)
-    $SPARK_HOME/sbin/start-master.sh
 
     # Start Spark History Server
     echo "[BOOTSTRAP] Starting Spark History Server..."
