@@ -11,8 +11,12 @@ services:
       - etl_data:/glustervol1
     ports:
       - "8088:8088" # ResourceManager
+      - "8032:8032"   # ✅ ADD THIS - ResourceManager RPC
+      - "8030:8030"   # ✅ ADD THIS - ResourceManager Scheduler
+      - "8031:8031"   # ✅ ADD THIS - ResourceManager Resource Tracker
       - "9870:9870" # NameNode WebUI
       - "10015:10015" # HDFS
+      - "9000:9000"   # ✅ ADD THIS - HDFS NameNode RPC
       - "8080:8080" # WebUI Spark Master
       - "18080:18080" # History WebUI Spark Master
       - "8042:8042" # NodeManager

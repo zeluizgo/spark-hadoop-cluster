@@ -1,50 +1,51 @@
 #!/bin/bash
 
-# Este trecho rodará independente de termos um container master ou
-# worker. Necesário para funcionamento do HDFS e para comunicação
-# dos containers/nodes.
+set -e
+
 /etc/init.d/ssh start
 
-# Abaixo temos o trecho que rodará apenas no master.
-if [[ $HOSTNAME = spark-master ]]; then
+if [[ "$HOSTNAME" == "spark-master" ]]; then
+    echo "[BOOTSTRAP] Starting MASTER node"
 
-    if [ -d "/hadoop_data/data/nameNode" ]
-    then
-        echo "nameNode hadoop directory already exists." 
-        # here could get namenode out of safemode...lol
+    # Initialize HDFS only on first run
+    if [ ! -d "/hadoop_data/data/nameNode/current" ]; then
+        echo "[BOOTSTRAP] Formatting NameNode..."
+        hdfs namenode -format -force
     else
-        # Formatamos o namenode
-        hdfs namenode -format
+        echo "[BOOTSTRAP] NameNode already formatted."
     fi
 
-    # Iniciamos os serviços
+    # Start HDFS + YARN ResourceManager
     $HADOOP_HOME/sbin/start-dfs.sh
     $HADOOP_HOME/sbin/start-yarn.sh
-    $SPARK_HOME/sbin/start-master.sh
 
-    # Criação de diretórios no ambiente distribuído do HDFS
-    hdfs dfs -mkdir /datasets
-    hdfs dfs -mkdir /datasets_processed
-    hdfs dfs -mkdir /spark-logs
-    hdfs dfs -mkdir /shared-libs
+    # Create required HDFS directories
+    hdfs dfs -mkdir -p /datasets \
+                     /datasets_processed \
+                     /spark-logs \
+                     /shared-libs
 
-    #tar -czf spark-libs.tar.gz $SPARK_HOME/jars/
-
-    #hdfs dfs -put -f spark-libs.tar.gz /shared-libs
+    # Upload Spark libraries for YARN
     hdfs dfs -put -f $SPARK_HOME/jars/* /shared-libs/
 
-    # Iniciamos o history server do Spark
-    #$SPARK_HOME/sbin/start-history-server.sh
-    $SPARK_HOME/bin/spark-class org.apache.spark.deploy.history.HistoryServer &
+    # Start Spark Master (only because you want WebUI — YARN will be used for jobs)
+    $SPARK_HOME/sbin/start-master.sh
 
-# E abaixo temos o trecho que rodará nos workers
+    # Start Spark History Server
+    echo "[BOOTSTRAP] Starting Spark History Server..."
+    $SPARK_HOME/sbin/start-history-server.sh &
+
 else
-    # Configs de HDFS nos dataNodes (workers)
-    $HADOOP_HOME/sbin/hadoop-daemon.sh start datanode &
-    $HADOOP_HOME/bin/yarn nodemanager &
-    
-    $SPARK_HOME/sbin/start-worker.sh spark://$SPARK_MASTER_HOST:$SPARK_MASTER_PORT
+    echo "[BOOTSTRAP] Starting WORKER node"
 
+    # Start YARN NodeManager
+    $HADOOP_HOME/bin/yarn nodemanager &
+
+    # Start HDFS DataNode
+    $HADOOP_HOME/sbin/hadoop-daemon.sh start datanode &
+
+    # DO NOT start Spark Worker (Spark is running on YARN!!)
 fi
 
-while :; do sleep 2073600; done
+# Keep container alive
+tail -f /dev/null
