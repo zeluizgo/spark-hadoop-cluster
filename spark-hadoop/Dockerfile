@@ -138,6 +138,49 @@ RUN wget http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/h
 
 #ENV YARN_RESOURCEMANAGER_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"
 
+RUN cp $HADOOP_CONF_DIR/hadoop-env.sh /opt/hadoop/etc/hadoop/ && \
+    cp $HADOOP_CONF_DIR/yarn-env.sh /opt/hadoop/etc/hadoop/
+
+# ---------- Apply add-opens patches directly ----------
+#RUN sed -i '/^# *export HADOOP_OPTS=/a \
+#export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
+#      $HADOOP_CONF_DIR/hadoop-env.sh && \
+#    sed -i '/^# *export YARN_RESOURCEMANAGER_OPTS=/a \
+#export YARN_RESOURCEMANAGER_OPTS="$YARN_RESOURCEMANAGER_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
+#      $HADOOP_CONF_DIR/yarn-env.sh
+
+# ... your existing content until the config files section ...
+
+# ---------- Config files ----------
+COPY config/hive/*.xml ${SPARK_HOME}/conf/
+COPY config/hive/*.xml ${HIVE_HOME}/conf/
+COPY config/hadoop/masters ${HADOOP_CONF_DIR}/
+COPY config/hadoop/slaves ${HADOOP_CONF_DIR}/
+COPY config/spark ${SPARK_HOME}/conf/
+COPY config/hadoop/*.xml ${HADOOP_CONF_DIR}/
+COPY config/scripts /
+
+RUN mkdir -p /tmp/hive-conf
+RUN mkdir -p /opt/hive/conf
+
+COPY config/hive/*.xml /tmp/hive-conf
+COPY config/hive/*.xml /opt/hive/conf
+
+# Set environment variables
+ENV HIVE_CONF_DIR=/opt/hive/conf
+
+# ⭐ REMOVE these lines that cause problems:
+# RUN mkdir -p /etc/java-17-openjdk && \
+#     echo "-Dhive.conf.dir=/opt/hive/conf" >> /etc/java-17-openjdk/java.conf && ...
+# RUN echo 'export JAVA_TOOL_OPTIONS=...' >> /etc/profile && ...
+
+# ✅ INSTEAD: Ensure JAVA_HOME is set in Hadoop's env files
+RUN echo "export JAVA_HOME=${JAVA_HOME}" >> ${HADOOP_CONF_DIR}/hadoop-env.sh && \
+    echo "export HDFS_JOURNALNODE_USER=root" >> ${HADOOP_CONF_DIR}/hadoop-env.sh && \
+    echo "export JAVA_HOME=${JAVA_HOME}" >> ${HADOOP_CONF_DIR}/yarn-env.sh
+
+# ✅ Also ensure it's in the global environment for all processes
+RUN echo "export JAVA_HOME=${JAVA_HOME}" >> /etc/environment
 
 # ---------- Apply add-opens patches directly ----------
 RUN sed -i '/^# *export HADOOP_OPTS=/a \
@@ -146,38 +189,6 @@ export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' 
     sed -i '/^# *export YARN_RESOURCEMANAGER_OPTS=/a \
 export YARN_RESOURCEMANAGER_OPTS="$YARN_RESOURCEMANAGER_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
       $HADOOP_CONF_DIR/yarn-env.sh
-
-
-RUN echo "export JAVA_HOME=/opt/java/openjdk" >> /usr/hadoop-${HADOOP_VERSION}/etc/hadoop/hadoop-env.sh
-
-COPY config/spark ${SPARK_HOME}/conf/
-COPY config/scripts /
-# ... your existing Dockerfile content ...
-
-RUN mkdir -p /tmp/hive-conf
-RUN mkdir -p /opt/hive/conf
-
-COPY config/hive/*.xml /tmp/hive-conf
-COPY config/hive/*.xml /opt/hive/conf
-COPY config/hive/*.xml ${SPARK_HOME}/conf/
-COPY config/hive/*.xml ${HIVE_HOME}/conf/
-COPY config/hadoop/*.xml /opt/hadoop/etc/hadoop/
-
-# Set environment variables so Spark can find them
-ENV HIVE_CONF_DIR=/opt/hive/conf
-ENV HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
-
-# ⭐ CRITICAL FIX: Create a Java system-wide config file
-# This ensures ALL JVMs in this container have these properties set
-RUN mkdir -p /etc/java-17-openjdk && \
-    echo "-Dhive.conf.dir=/opt/hive/conf" >> /etc/java-17-openjdk/java.conf && \
-    echo "-DHIVE_CONF_DIR=/opt/hive/conf" >> /etc/java-17-openjdk/java.conf && \
-    echo "-DHIVE_HOME=/usr/hive" >> /etc/java-17-openjdk/java.conf && \
-    echo "-DHADOOP_CONF_DIR=/opt/hadoop/etc/hadoop" >> /etc/java-17-openjdk/java.conf
-
-# ⭐ ALTERNATIVE: Add to global Java environment
-RUN echo 'export JAVA_TOOL_OPTIONS="-Dhive.conf.dir=/opt/hive/conf -DHIVE_CONF_DIR=/opt/hive/conf -DHIVE_HOME=/usr/hive -DHADOOP_CONF_DIR=/opt/hadoop/etc/hadoop"' >> /etc/profile && \
-    echo 'export JAVA_TOOL_OPTIONS="-Dhive.conf.dir=/opt/hive/conf -DHIVE_CONF_DIR=/opt/hive/conf -DHIVE_HOME=/usr/hive -DHADOOP_CONF_DIR=/opt/hadoop/etc/hadoop"' >> /root/.bashrc
 
 # Expose ports
 EXPOSE 8042 9870 18080 9000 4040 8020 22 8080 7077 8081 8088 6066 7001 8030 8031 8032 2181 2888 3888 10000
