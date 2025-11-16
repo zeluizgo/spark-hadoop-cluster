@@ -140,7 +140,8 @@ RUN wget http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/h
 
 ENV HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
 
-RUN cp ${HADOOP_HOME}/etc/hadoop $HADOOP_CONF_DIR -r
+RUN mkdir -p $HADOOP_CONF_DIR \
+    cp ${HADOOP_HOME}/etc/hadoop $HADOOP_CONF_DIR -r
 
 ENV HIVE_CONF_DIR=/opt/hive/conf
 
