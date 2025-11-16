@@ -2,7 +2,7 @@ FROM --platform=linux/arm64 eclipse-temurin:17-jdk-jammy
 
 
 # ---------- Versions ----------
-ENV SCALA_VERSION=2.12.18
+ENV SCALA_VERSION=2.13.16
 ENV HADOOP_VERSION=3.4.0
 ENV HADOOP_MINOR_VERSION=3
 ENV HIVE_VERSION=4.0.1
