@@ -137,6 +137,7 @@ RUN echo "export JAVA_HOME=/opt/java/openjdk" >> /usr/hadoop-${HADOOP_VERSION}/e
 
 # ---------- Config files ----------
 COPY config/hive/*.xml ${SPARK_HOME}/conf/
+COPY config/hive/*.xml ${HIVE_HOME}/conf/
 COPY config/hadoop/masters ${HADOOP_CONF_DIR}/
 COPY config/hadoop/slaves ${HADOOP_CONF_DIR}/
 COPY config/spark ${SPARK_HOME}/conf/
