@@ -144,6 +144,17 @@ COPY config/hadoop/*.xml ${HADOOP_CONF_DIR}/
 COPY config/scripts /
 
 
+RUN mkdir -p /tmp/hive-conf
+RUN mkdir -p /opt/hive/conf  # ✅ ADICIONAR ESTA LINHA
+
+COPY config/hive/*.xml /tmp/hive-conf
+COPY config/hive/*.xml /opt/hive/conf
+
+# Set environment variables so Spark can find them
+ENV HIVE_CONF_DIR=/opt/hive/conf
+
+
+
 #ENV YARN_OPTS="-XX:+IgnoreUnrecognizedVMOptions -XX:-UseContainerSupport --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED"
 
 #ENV YARN_RESOURCEMANAGER_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"

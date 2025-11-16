@@ -44,6 +44,13 @@
             <description>IP address (or fully-qualified domain name) and port of the metastore host</description>
         </property>
 
+
+        <property>
+            <name>hive.metastore.warehouse.dir</name>
+            <value>hdfs://spark-master:9000/datasets</value>
+            <description>location of default database for the warehouse</description>
+        </property>
+
         <property>
             <name>hive.metastore.schema.verification</name>
             <value>false</value>

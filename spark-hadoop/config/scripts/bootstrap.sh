@@ -23,7 +23,7 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
 
     # Start Spark Master (only because you want WebUI — YARN will be used for jobs)
     $SPARK_HOME/sbin/start-master.sh
-    
+
     sleep 10
 
     # Create required HDFS directories
@@ -41,6 +41,16 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
 
 else
     echo "[BOOTSTRAP] Starting WORKER node"
+    echo "[BOOTSTRAP] Starting WORKER node - 📂 Configuration directories:"
+    echo "  [BOOTSTRAP] Starting WORKER node - HIVE_CONF_DIR=$HIVE_CONF_DIR"
+    echo "  [BOOTSTRAP] Starting WORKER node - HIVE_HOME=$HIVE_HOME"
+
+    # Verify file exists
+    if [ -f "/opt/hive/conf/hive-site.xml" ]; then
+        echo "[BOOTSTRAP] Starting WORKER node - ✅ Verified: /opt/hive/conf/hive-site.xml exists"
+    else
+        echo "[BOOTSTRAP] Starting WORKER node - ❌ ERROR: /opt/hive/conf/hive-site.xml NOT found!"
+    fi
 
     # Start YARN NodeManager
     $HADOOP_HOME/bin/yarn nodemanager &
