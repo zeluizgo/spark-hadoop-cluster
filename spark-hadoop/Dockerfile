@@ -173,6 +173,17 @@ COPY config/hive/*.xml /opt/hive/conf
 # Set environment variables
 ENV HIVE_CONF_DIR=/opt/hive/conf
 
+
+# ⭐ CRITICAL FIX: Create a Java system-wide config file
+# This ensures ALL JVMs in this container have these properties set
+RUN mkdir -p /etc/java-17-openjdk && \
+    echo "-Dhive.conf.dir=/opt/hive/conf" >> /etc/java-17-openjdk/java.conf && \
+    echo "-DHIVE_CONF_DIR=/opt/hive/conf" >> /etc/java-17-openjdk/java.conf && \
+    echo "-DHIVE_HOME=${HIVE_HOME}" >> /etc/java-17-openjdk/java.conf && \
+    echo "-DHADOOP_CONF_DIR=${HADOOP_CONF_DIR}" >> /etc/java-17-openjdk/java.conf
+
+
+
 # ⭐ REMOVE these lines that cause problems:
 # RUN mkdir -p /etc/java-17-openjdk && \
 #     echo "-Dhive.conf.dir=/opt/hive/conf" >> /etc/java-17-openjdk/java.conf && ...
