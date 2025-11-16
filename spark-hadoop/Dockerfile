@@ -132,28 +132,6 @@ RUN wget http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/h
     # Clean permissions
     chown -R root:root ${HIVE_HOME} ${SPARK_HOME}
 
-RUN echo "export JAVA_HOME=/opt/java/openjdk" >> /usr/hadoop-${HADOOP_VERSION}/etc/hadoop/hadoop-env.sh
-
-
-# ---------- Config files ----------
-COPY config/hive/*.xml ${SPARK_HOME}/conf/
-COPY config/hive/*.xml ${HIVE_HOME}/conf/
-COPY config/hadoop/masters ${HADOOP_CONF_DIR}/
-COPY config/hadoop/slaves ${HADOOP_CONF_DIR}/
-COPY config/spark ${SPARK_HOME}/conf/
-COPY config/hadoop/*.xml ${HADOOP_CONF_DIR}/
-COPY config/scripts /
-
-
-RUN mkdir -p /tmp/hive-conf
-RUN mkdir -p /opt/hive/conf  # ✅ ADICIONAR ESTA LINHA
-
-COPY config/hive/*.xml /tmp/hive-conf
-COPY config/hive/*.xml /opt/hive/conf
-
-# Set environment variables so Spark can find them
-ENV HIVE_CONF_DIR=/opt/hive/conf
-
 
 
 #ENV YARN_OPTS="-XX:+IgnoreUnrecognizedVMOptions -XX:-UseContainerSupport --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED"
@@ -169,16 +147,42 @@ export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' 
 export YARN_RESOURCEMANAGER_OPTS="$YARN_RESOURCEMANAGER_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
       $HADOOP_CONF_DIR/yarn-env.sh
 
+
+RUN echo "export JAVA_HOME=/opt/java/openjdk" >> /usr/hadoop-${HADOOP_VERSION}/etc/hadoop/hadoop-env.sh
+
+COPY config/spark ${SPARK_HOME}/conf/
+COPY config/scripts /
+# ... your existing Dockerfile content ...
+
+RUN mkdir -p /tmp/hive-conf
+RUN mkdir -p /opt/hive/conf
+
+COPY config/hive/*.xml /tmp/hive-conf
+COPY config/hive/*.xml /opt/hive/conf
+COPY config/hive/*.xml ${SPARK_HOME}/conf/
+COPY config/hive/*.xml ${HIVE_HOME}/conf/
+COPY config/hadoop/*.xml /opt/hadoop/etc/hadoop/
+
+# Set environment variables so Spark can find them
+ENV HIVE_CONF_DIR=/opt/hive/conf
+ENV HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+
+# ⭐ CRITICAL FIX: Create a Java system-wide config file
+# This ensures ALL JVMs in this container have these properties set
+RUN mkdir -p /etc/java-17-openjdk && \
+    echo "-Dhive.conf.dir=/opt/hive/conf" >> /etc/java-17-openjdk/java.conf && \
+    echo "-DHIVE_CONF_DIR=/opt/hive/conf" >> /etc/java-17-openjdk/java.conf && \
+    echo "-DHIVE_HOME=/usr/hive" >> /etc/java-17-openjdk/java.conf && \
+    echo "-DHADOOP_CONF_DIR=/opt/hadoop/etc/hadoop" >> /etc/java-17-openjdk/java.conf
+
+# ⭐ ALTERNATIVE: Add to global Java environment
+RUN echo 'export JAVA_TOOL_OPTIONS="-Dhive.conf.dir=/opt/hive/conf -DHIVE_CONF_DIR=/opt/hive/conf -DHIVE_HOME=/usr/hive -DHADOOP_CONF_DIR=/opt/hadoop/etc/hadoop"' >> /etc/profile && \
+    echo 'export JAVA_TOOL_OPTIONS="-Dhive.conf.dir=/opt/hive/conf -DHIVE_CONF_DIR=/opt/hive/conf -DHIVE_HOME=/usr/hive -DHADOOP_CONF_DIR=/opt/hadoop/etc/hadoop"' >> /root/.bashrc
+
 # Expose ports
 EXPOSE 8042 9870 18080 9000 4040 8020 22 8080 7077 8081 8088 6066 7001 8030 8031 8032 2181 2888 3888 10000
 
 # Clean up
 RUN apt-get remove -y wget unzip && apt-get autoremove -y && apt-get clean
-# Algumas configuracoes adicionais e inicio de alguns servicoes que devem ser feitos em
-# tempo de execucao estao presentes no script bootstrap.
-# Este cuidará de colocar alguns datasets exemplo dentro do HDFS, bem como de iniciar 
-# servicos como HDFS (formatando Namenode), iniciando o Hive, definindo o ID do 
-# Zookeeper para que suas diferentes instâncias possam se ver e iniciando este servico.
-# O comando ENTRYPOINT define que este script será executado quando os containeres
-# iniciarem.
+
 ENTRYPOINT ["/bin/bash", "bootstrap.sh"]
