@@ -174,6 +174,24 @@ COPY config/hive/*.xml /opt/hive/conf
 ENV HIVE_CONF_DIR=/opt/hive/conf
 
 
+# create Hive lib dir
+RUN mkdir -p /opt/spark/hive3-lib
+
+# copy Hive 3.x jars built by Gradle
+COPY ${HIVE_HOME}/lib/hive-exec-3.1.3.jar /opt/spark/hive3-lib/
+COPY ${HIVE_HOME}/lib/hive-metastore-3.1.3.jar /opt/spark/hive3-lib/
+COPY ${HIVE_HOME}/lib/hive-common-3.1.3.jar /opt/spark/hive3-lib/
+
+# Disable Spark’s bundled Hive 2.x jars safely
+RUN if [ -d "$SPARK_HOME/jars" ]; then \
+        find $SPARK_HOME/jars -name "hive-*.jar" -exec mv {} {}.disabled \; ; \
+    fi
+
+# Add Hive 3.x jars to Spark’s classpath
+ENV SPARK_CLASSPATH="/opt/spark/hive3-lib/*:$SPARK_HOME/jars/*"
+ENV CLASSPATH=$SPARK_CLASSPATH:$CLASSPATH
+
+
 # ⭐ CRITICAL FIX: Create a Java system-wide config file
 # This ensures ALL JVMs in this container have these properties set
 RUN mkdir -p /etc/java-17-openjdk && \
@@ -181,8 +199,6 @@ RUN mkdir -p /etc/java-17-openjdk && \
     echo "-DHIVE_CONF_DIR=/opt/hive/conf" >> /etc/java-17-openjdk/java.conf && \
     echo "-DHIVE_HOME=${HIVE_HOME}" >> /etc/java-17-openjdk/java.conf && \
     echo "-DHADOOP_CONF_DIR=${HADOOP_CONF_DIR}" >> /etc/java-17-openjdk/java.conf
-
-
 
 # ⭐ REMOVE these lines that cause problems:
 # RUN mkdir -p /etc/java-17-openjdk && \
