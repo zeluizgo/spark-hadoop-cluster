@@ -138,10 +138,10 @@ RUN wget http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/h
 
 #ENV YARN_RESOURCEMANAGER_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"
 
-ENV HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+#ENV HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
 
-RUN mkdir -p $HADOOP_CONF_DIR \
-    cp ${HADOOP_HOME}/etc/hadoop $HADOOP_CONF_DIR
+#RUN mkdir -p $HADOOP_CONF_DIR \
+#    cp ${HADOOP_HOME}/etc/hadoop $HADOOP_CONF_DIR
 
 ENV HIVE_CONF_DIR=/opt/hive/conf
 
