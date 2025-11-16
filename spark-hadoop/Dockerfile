@@ -178,9 +178,9 @@ ENV HIVE_CONF_DIR=/opt/hive/conf
 RUN mkdir -p /opt/spark/hive3-lib
 
 # copy Hive 3.x jars built by Gradle
-COPY ${HIVE_HOME}/lib/hive-exec-3.1.3.jar /opt/spark/hive3-lib/
-COPY ${HIVE_HOME}/lib/hive-metastore-3.1.3.jar /opt/spark/hive3-lib/
-COPY ${HIVE_HOME}/lib/hive-common-3.1.3.jar /opt/spark/hive3-lib/
+RUN cp ${HIVE_HOME}/lib/hive-exec-3.1.3.jar /opt/spark/hive3-lib/
+RUN cp ${HIVE_HOME}/lib/hive-metastore-3.1.3.jar /opt/spark/hive3-lib/
+RUN cp ${HIVE_HOME}/lib/hive-common-3.1.3.jar /opt/spark/hive3-lib/
 
 # Disable Spark’s bundled Hive 2.x jars safely
 RUN if [ -d "$SPARK_HOME/jars" ]; then \
