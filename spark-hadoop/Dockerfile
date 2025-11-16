@@ -138,8 +138,11 @@ RUN wget http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/h
 
 #ENV YARN_RESOURCEMANAGER_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"
 
-RUN cp $HADOOP_CONF_DIR/hadoop-env.sh /opt/hadoop/etc/hadoop/ && \
-    cp $HADOOP_CONF_DIR/yarn-env.sh /opt/hadoop/etc/hadoop/
+ENV HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+
+RUN cp ${HADOOP_HOME}/etc/hadoop $HADOOP_CONF_DIR -r
+
+ENV HIVE_CONF_DIR=/opt/hive/conf
 
 # ---------- Apply add-opens patches directly ----------
 #RUN sed -i '/^# *export HADOOP_OPTS=/a \
