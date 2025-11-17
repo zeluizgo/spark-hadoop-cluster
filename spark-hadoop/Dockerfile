@@ -61,9 +61,8 @@ ENV HADOOP_OPTS="-XX:+IgnoreUnrecognizedVMOptions \
 
 # ---------- Dependencies ----------
 RUN apt-get update && \
-    apt-get install -y curl gnupg2 ca-certificates ssh openssh-server wget rsync python3 python3-pip python3-dev gcc && \
+    apt-get install -y curl gnupg2 ca-certificates ssh openssh-server wget rsync python3 python3-pip python3-dev gcc sudo && \ 
     apt-get clean
-
 
 # ---------- Python dependencies ----------
 COPY /config/jupyter/requirements.txt /
@@ -160,7 +159,14 @@ ENV CLASSPATH=$SPARK_CLASSPATH:$CLASSPATH
 RUN echo "export JAVA_HOME=${JAVA_HOME}" >> ${HADOOP_CONF_DIR}/hadoop-env.sh && \
     echo "export HDFS_JOURNALNODE_USER=root" >> ${HADOOP_CONF_DIR}/hadoop-env.sh && \
     echo "export JAVA_HOME=${JAVA_HOME}" >> ${HADOOP_CONF_DIR}/yarn-env.sh && \
-    echo "export JAVA_HOME=${JAVA_HOME}" >> /etc/environment
+    echo "export JAVA_HOME=${JAVA_HOME}" >> /etc/environment \
+    # FIX: Adicione env vars de usuário no hadoop-env.sh (para root)
+    echo "export HDFS_NAMENODE_USER=root" >> ${HADOOP_CONF_DIR}/hadoop-env.sh && \
+    echo "export HDFS_DATANODE_USER=root" >> ${HADOOP_CONF_DIR}/hadoop-env.sh && \
+    echo "export HDFS_SECONDARYNAMENODE_USER=root" >> ${HADOOP_CONF_DIR}/hadoop-env.sh && \
+    echo "export HADOOP_SECURE_DN_USER=root" >> ${HADOOP_CONF_DIR}/hadoop-env.sh && \
+    echo "export YARN_RESOURCEMANAGER_USER=root" >> ${HADOOP_CONF_DIR}/yarn-env.sh && \
+    echo "export YARN_NODEMANAGER_USER=root" >> ${HADOOP_CONF_DIR}/yarn-env.sh
 
 # Add-opens patches
 RUN sed -i '/^# *export HADOOP_OPTS=/a export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
