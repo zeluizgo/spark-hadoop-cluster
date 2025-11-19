@@ -7,7 +7,7 @@ services:
     tty: true
     volumes:
       - /home/ubuntu/projects:/user_data
-      - /media/data/hadoop:/hadoop_data
+      - hadoop_data:/hadoop_data
       - etl_data:/glustervol1
     ports:
       - "8088:8088" # ResourceManager
@@ -38,7 +38,7 @@ services:
     hostname: spark-worker-1
     tty: true
     volumes:
-      - /media/data/hadoop:/hadoop_data
+      - hadoop_data:/hadoop_data
       - etl_data:/glustervol1
     depends_on:
       - spark-master
@@ -62,7 +62,7 @@ services:
     hostname: spark-worker-2
     tty: true
     volumes:
-      - /media/data/hadoop:/hadoop_data
+      - hadoop_data:/hadoop_data
       - etl_data:/glustervol1
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     depends_on:
@@ -89,7 +89,7 @@ services:
     hostname: spark-worker-3
     tty: true
     volumes:
-      - /media/data/hadoop:/hadoop_data
+      - hadoop_data:/hadoop_data
       - etl_data:/glustervol1
     depends_on:
       - spark-master
@@ -113,7 +113,7 @@ services:
     hostname: hive-server
     tty: true
     volumes:
-      - /media/data/hadoop:/hadoop_data
+      - hadoop_data:/hadoop_data
     ports:
       - "10000:10000" # HiveServer2 - Binary Mode
       - "10001:10001" # HiveServer - HTTP Mode
@@ -135,7 +135,7 @@ services:
     tty: true
     volumes:
       - /home/ubuntu/projects:/user_data
-      - /media/data/hadoop:/hadoop_data
+      - hadoop_data:/hadoop_data
       - etl_data:/glustervol1
     ports:
       - "8888:8888" # Jupyter
@@ -161,3 +161,9 @@ volumes:
       type: none
       o: bind
       device: /media/glusterfs
+  hadoop_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /media/data/hadoop
