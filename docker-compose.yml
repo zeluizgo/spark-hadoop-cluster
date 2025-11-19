@@ -124,6 +124,7 @@ services:
       cluster-network:
         ipv4_address: 10.5.0.6
     deploy:
+      replicas: 0   # Start with 0 replicas
       placement:
         constraints:
           - node.labels.workerid == 1
@@ -159,4 +160,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /mnt/vol1
+      device: /media/glusterfs

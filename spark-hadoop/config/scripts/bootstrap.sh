@@ -36,21 +36,34 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
     hdfs dfs -put -f $SPARK_HOME/jars/* /shared-libs/
 
     # Start Spark History Server
-    echo "[BOOTSTRAP] Starting Spark History Server..."
-    $SPARK_HOME/sbin/start-history-server.sh &
+   # FORMA DIRETA E 100% CONFIÁVEL – funciona em qualquer Spark 3.x/4.x (2025)
+    echo "[BOOTSTRAP] Starting Spark History Server (direct Java call)..."
+
+    # Diretório onde ficam os event-logs (mude se quiser local ou outro path no HDFS)
+    EVENT_LOG_DIR="hdfs://spark-master:9000/spark-logs"
+
+    # Cria o diretório no HDFS se não existir
+    hdfs dfs -mkdir -p $EVENT_LOG_DIR 2>/dev/null || true
+    hdfs dfs -chmod 777 $EVENT_LOG_DIR 2>/dev/null || true
+
+    # Inicia o History Server direto na JVM (sem script, sem mistério)
+    $SPARK_HOME/bin/spark-class org.apache.spark.deploy.history.HistoryServer \
+        --properties-file $SPARK_HOME/conf/spark-defaults.conf \
+        1 \
+        $EVENT_LOG_DIR \
+        > $SPARK_HOME/logs/history-server.out 2>&1 &
+
+    # Pequeno delay + confirmação visual
+    sleep 8
+    if pgrep -f HistoryServer > /dev/null; then
+        echo "History Server rodando → http://$(hostname -I | awk '{print $1}'):18080"
+    else
+        echo "FALHOU → últimas linhas do log:"
+        tail -20 $SPARK_HOME/logs/history-server.out
+    fi
 
 else
     echo "[BOOTSTRAP] Starting WORKER node"
-    echo "[BOOTSTRAP] Starting WORKER node - 📂 Configuration directories:"
-    echo "  [BOOTSTRAP] Starting WORKER node - HIVE_CONF_DIR=$HIVE_CONF_DIR"
-    echo "  [BOOTSTRAP] Starting WORKER node - HIVE_HOME=$HIVE_HOME"
-
-    # Verify file exists
-    if [ -f "/opt/hive/conf/hive-site.xml" ]; then
-        echo "[BOOTSTRAP] Starting WORKER node - ✅ Verified: /opt/hive/conf/hive-site.xml exists"
-    else
-        echo "[BOOTSTRAP] Starting WORKER node - ❌ ERROR: /opt/hive/conf/hive-site.xml NOT found!"
-    fi
 
     # Start YARN NodeManager
     $HADOOP_HOME/bin/yarn nodemanager &

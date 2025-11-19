@@ -5,7 +5,6 @@ FROM --platform=linux/arm64 eclipse-temurin:17-jdk-jammy
 ENV SCALA_VERSION=2.13.16
 ENV HADOOP_VERSION=3.4.0
 ENV HADOOP_MINOR_VERSION=3
-ENV HIVE_VERSION=4.0.1
 ENV SPARK_VERSION=4.0.1
 
 
@@ -15,11 +14,10 @@ ENV JAVA_HOME=/opt/java/openjdk
 ENV SCALA_HOME=/usr/scala
 ENV HADOOP_HOME=/usr/hadoop-${HADOOP_VERSION}
 ENV HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop
-ENV HIVE_HOME=/usr/hive
 ENV SPARK_HOME=/usr/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}
 ENV SPARK_CONF_DIR=${SPARK_HOME}/conf
-ENV CLASSPATH=${HIVE_HOME}/lib
-ENV PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$SPARK_HOME/bin:$HIVE_HOME/bin:$SCALA_HOME/bin
+ENV CLASSPATH=${SPARK_HOME}/jars/*
+ENV PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$SPARK_HOME/bin:$SCALA_HOME/bin
 ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9.7-src.zip
 
 
@@ -99,61 +97,16 @@ RUN wget http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/h
     wget http://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}.tgz && \
     tar zxvf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}.tgz -C /usr/ && \
     rm spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}.tgz && \
-    chown -R root:root ${SPARK_HOME} && \
-        # Hive
-    wget https://archive.apache.org/dist/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz && \
-    tar zxvf apache-hive-${HIVE_VERSION}-bin.tar.gz && \
-    rm apache-hive-${HIVE_VERSION}-bin.tar.gz && \
-    mv apache-hive-${HIVE_VERSION}-bin ${HIVE_HOME} && \
-    cp ${HIVE_HOME}/conf/hive-env.sh.template ${HIVE_HOME}/conf/hive-env.sh && \
-    echo "export HADOOP_HOME=${HADOOP_HOME}" >> ${HIVE_HOME}/conf/hive-env.sh && \
-    # Configurando o conector do metastore do Hive
-    ln -s /usr/share/java/mariadb-java-client.jar ${HIVE_HOME}/lib/mariadb-java-client.jar && \
-    # Criando diretório para jars externos do Hive e baixando suporte a parquet
-    mkdir -p /usr/hive/aux_jars && \
-    wget https://repo1.maven.org/maven2/com/twitter/parquet-avro/1.2.5/parquet-avro-1.2.5.jar -P /usr/hive/aux_jars/ && \
-    wget https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar -P /usr/hive/lib/ && \
-    chown -R root:root ${HIVE_HOME} ${SPARK_HOME}
-
-# Substitua Hive 2.x por 4.0.1 no Spark (fix conflito HiveConf)
-RUN mkdir -p ${SPARK_HOME}/hive4-lib && \
-    find ${SPARK_HOME}/jars -type f -name "hive-*.jar" -exec mv {} ${SPARK_HOME}/hive4-lib/ \; && \
-    find ${SPARK_HOME}/jars -type f -name "hive-shims-*.jar" -exec mv {} ${SPARK_HOME}/hive4-lib/ \; && \
-    find ${SPARK_HOME}/jars -type f -name "hive-*.jar.disabled" -delete && \
-    cp ${HIVE_HOME}/lib/hive-*.jar ${SPARK_HOME}/jars/ && \
-    cp ${HIVE_HOME}/lib/libfb303*.jar ${SPARK_HOME}/jars/ || true && \
-    cp ${HIVE_HOME}/lib/libthrift*.jar ${SPARK_HOME}/jars/ || true
-
-ENV HIVE_CONF_DIR=/opt/hive/conf
+    chown -R root:root ${SPARK_HOME} 
 
 # ---------- Config files ----------
-RUN mkdir -p /tmp/hive-conf /opt/hive/conf
 COPY config/hive/*.xml ${SPARK_HOME}/conf/
-COPY config/hive/*.xml ${HIVE_HOME}/conf/
 COPY config/hadoop/masters ${HADOOP_CONF_DIR}/
 COPY config/hadoop/slaves ${HADOOP_CONF_DIR}/
 COPY config/spark ${SPARK_HOME}/conf/
 COPY config/hadoop/*.xml ${HADOOP_CONF_DIR}/
 COPY config/hive/*.xml ${HADOOP_CONF_DIR}/
-COPY config/hive/*.xml /tmp/hive-conf
-COPY config/hive/*.xml /opt/hive/conf
 COPY config/scripts /
-
-
-# Fix URI scheme e metastore
-RUN sed -i 's|<value>.*warehouse.*</value>|<value>file:\/\/\/tmp\/hive\/warehouse<\/value>|g' /opt/hive/conf/hive-site.xml && \
-    echo "spark.sql.hive.metastore.version=4.0.1" >> ${SPARK_CONF_DIR}/spark-defaults.conf && \
-    echo "spark.sql.warehouse.dir=file:///tmp/spark-warehouse" >> ${SPARK_CONF_DIR}/spark-defaults.conf
-
-# Classpath fix
-RUN mkdir -p /opt/spark/hive4-lib && \
-    cp ${HIVE_HOME}/lib/hive-exec-4.0.1.jar /opt/spark/hive4-lib/ || true && \
-    cp ${HIVE_HOME}/lib/hive-metastore-4.0.1.jar /opt/spark/hive4-lib/ || true && \
-    cp ${HIVE_HOME}/lib/hive-common-4.0.1.jar /opt/spark/hive4-lib/ || true && \
-    find $SPARK_HOME/jars -name "hive-*.jar" -exec mv {} {}.disabled \;  # Dupla verificação
-
-ENV SPARK_CLASSPATH="/opt/spark/hive4-lib/*:$SPARK_HOME/jars/*"
-ENV CLASSPATH=$SPARK_CLASSPATH:$CLASSPATH
 
 # Java/Hadoop env fixes
 RUN echo "export JAVA_HOME=${JAVA_HOME}" >> ${HADOOP_CONF_DIR}/hadoop-env.sh && \
