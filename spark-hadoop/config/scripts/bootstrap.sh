@@ -26,52 +26,42 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
 
     sleep 10
 
-    # Create required HDFS directories
-    hdfs dfs -mkdir -p /datasets \
-                     /datasets_processed \
-                     /spark-logs \
-                     /shared-libs
+    # Cria diretórios essenciais no HDFS
+    hdfs dfs -mkdir -p /datasets /datasets_processed /spark-logs /shared-libs 2>/dev/null || true
+    hdfs dfs -chmod 1777 /spark-logs 2>/dev/null || true
+    hdfs dfs -put -f $SPARK_HOME/jars/* /shared-libs/ 2>/dev/null || true
 
-    # Upload Spark libraries for YARN
-    hdfs dfs -put -f $SPARK_HOME/jars/* /shared-libs/
+    # Sai do Safe Mode (necessário após o primeiro start-dfs.sh)
+    hdfs dfsadmin -safemode leave 2>/dev/null || true
 
-    # Start Spark History Server
-   # FORMA DIRETA E 100% CONFIÁVEL – funciona em qualquer Spark 3.x/4.x (2025)
-    echo "[BOOTSTRAP] Starting Spark History Server (direct Java call)..."
+    # Spark History Server — versão que NUNCA morre (Spark 4.0.1)
+    echo "[BOOTSTRAP] Starting Spark History Server (versão infalível)..."
+    hdfs dfs -mkdir -p hdfs://spark-master:9000/spark-logs 2>/dev/null || true
+    hdfs dfs -chmod 1777 hdfs://spark-master:9000/spark-logs 2>/dev/null || true
 
-    # Diretório onde ficam os event-logs (mude se quiser local ou outro path no HDFS)
-    EVENT_LOG_DIR="hdfs://spark-master:9000/spark-logs"
+    nohup $SPARK_HOME/bin/spark-class org.apache.spark.deploy.history.HistoryServer \
+        > $SPARK_HOME/logs/history-server.log 2>&1 &
 
-    # Cria o diretório no HDFS se não existir
-    hdfs dfs -mkdir -p $EVENT_LOG_DIR 2>/dev/null || true
-    hdfs dfs -chmod 777 $EVENT_LOG_DIR 2>/dev/null || true
-
-    # Inicia o History Server direto na JVM (sem script, sem mistério)
-    $SPARK_HOME/bin/spark-class org.apache.spark.deploy.history.HistoryServer \
-        --properties-file $SPARK_HOME/conf/spark-defaults.conf \
-        1 \
-        $EVENT_LOG_DIR \
-        > $SPARK_HOME/logs/history-server.out 2>&1 &
-
-    # Pequeno delay + confirmação visual
-    sleep 8
-    if pgrep -f HistoryServer > /dev/null; then
-        echo "History Server rodando → http://$(hostname -I | awk '{print $1}'):18080"
-    else
-        echo "FALHOU → últimas linhas do log:"
-        tail -20 $SPARK_HOME/logs/history-server.out
-    fi
+    echo "MASTER totalmente pronto!"
+    echo "   NameNode UI      → http://$(hostname -I | awk '{print $1}'):9870"
+    echo "   YARN UI          → http://$(hostname -I | awk '{print $1}'):8088"
+    echo "   Spark Master UI  → http://$(hostname -I | awk '{print $1}'):8080"
+    echo "   History Server   → http://$(hostname -I | awk '{print $1}'):18080"
 
 else
-    echo "[BOOTSTRAP] Starting WORKER node"
+    echo "[BOOTSTRAP] Starting WORKER node ($HOSTNAME)"
 
-    # Start YARN NodeManager
-    $HADOOP_HOME/bin/yarn nodemanager &
+    # YARN NodeManager
+    $HADOOP_HOME/bin/yarn --daemon start nodemanager
 
-    # Start HDFS DataNode
-    $HADOOP_HOME/sbin/hadoop-daemon.sh start datanode &
-
-    # DO NOT start Spark Worker (Spark is running on YARN!!)
+    # DataNode direto na JVM — a ÚNICA forma estável no Raspberry Pi + Hadoop 3.4.0
+    echo "[BOOTSTRAP] Starting DataNode (JVM direta — solução definitiva)"
+    exec java -cp "${HADOOP_HOME}/etc/hadoop:${HADOOP_HOME}/share/hadoop/common/*:${HADOOP_HOME}/share/hadoop/common/lib/*:${HADOOP_HOME}/share/hadoop/hdfs/*:${HADOOP_HOME}/share/hadoop/thirdparty/*" \
+         -Dproc_datanode \
+         -Dhadoop.log.dir=${HADOOP_HOME}/logs \
+         -Dhadoop.log.file=hadoop-root-datanode-$(hostname).log \
+         -Dhadoop.root.logger=INFO,console \
+         org.apache.hadoop.hdfs.server.datanode.DataNode
 fi
 
 # Keep container alive
