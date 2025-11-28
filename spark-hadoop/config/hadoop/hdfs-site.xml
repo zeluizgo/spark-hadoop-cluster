@@ -23,7 +23,7 @@
         <name>dfs.client.block.write.replace-datanode-on-failure.policy</name><value>NEVER</value>
     </property>
     <property>
-        <name>dfs.replication</name><value>2</value>
+        <name>dfs.replication</name><value>3</value>
     </property>
     <property>
         <name>dfs.blocksize</name><value>134217728</value>
