@@ -99,6 +99,9 @@ RUN wget http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/h
     rm spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}.tgz && \
     chown -R root:root ${SPARK_HOME} 
 
+# ---------- CRITICAL FIX: Create config dir BEFORE copying configs ----------
+RUN mkdir -p ${HADOOP_CONF_DIR} ${SPARK_CONF_DIR}
+
 # ---------- Config files ----------
 COPY config/hive/*.xml ${SPARK_HOME}/conf/
 COPY config/hadoop/masters ${HADOOP_CONF_DIR}/
