@@ -3,11 +3,11 @@
 <configuration>
     <property>
             <name>dfs.namenode.name.dir</name>
-            <value>/hadoop_data/data/nameNode</value>
+            <value>/hadoop_data/dfs/name</value>
     </property>
     <property>
             <name>dfs.datanode.data.dir</name>
-            <value>/hadoop_data/data/dataNode</value>
+            <value>/hadoop_data/dfs/data</value>
     </property>
     <!-- Critical stability settings for Docker/Pi clusters -->
     <property>
