@@ -130,7 +130,7 @@ services:
     tty: true
     volumes:
       - /home/ubuntu/projects:/user_data
-      - /media/data/hadoop/datanode1:/hadoop_data/dfs/data
+      - /media/data/hadoop/datanode:/hadoop_data/dfs/data
       - etl_data:/glustervol1
     ports:
       - "8888:8888" # Jupyter
