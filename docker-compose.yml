@@ -7,7 +7,8 @@ services:
     tty: true
     volumes:
       - /home/ubuntu/projects:/user_data
-      - hadoop_data:/hadoop_data
+      - /media/data/hadoop/namenode:/hadoop_data/dfs/name          # ← NameNode only
+      - /media/data/hadoop/logs/namenode:/hadoop_data/logs
       - etl_data:/glustervol1
     ports:
       - "8088:8088" # ResourceManager
@@ -41,7 +42,8 @@ services:
     hostname: spark-worker-1
     tty: true
     volumes:
-      - hadoop_data:/hadoop_data
+      - /media/data/hadoop/datanode:/hadoop_data/dfs/data          # ← LOCAL disk on THIS Pi
+      - /media/data/hadoop/logs/worker1:/hadoop_data/logs
       - etl_data:/glustervol1
     depends_on:
       - spark-master
@@ -68,7 +70,8 @@ services:
     hostname: spark-worker-2
     tty: true
     volumes:
-      - hadoop_data:/hadoop_data
+      - /media/data/hadoop/datanode:/hadoop_data/dfs/data          # ← LOCAL disk on THIS Pi
+      - /media/data/hadoop/logs/worker2:/hadoop_data/logs
       - etl_data:/glustervol1
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     depends_on:
@@ -98,7 +101,8 @@ services:
     hostname: spark-worker-3
     tty: true
     volumes:
-      - hadoop_data:/hadoop_data
+      - /media/data/hadoop/datanode:/hadoop_data/dfs/data          # ← LOCAL disk on THIS Pi
+      - /media/data/hadoop/logs/worker3:/hadoop_data/logs
       - etl_data:/glustervol1
     depends_on:
       - spark-master
@@ -126,7 +130,7 @@ services:
     tty: true
     volumes:
       - /home/ubuntu/projects:/user_data
-      - hadoop_data:/hadoop_data
+      - /media/data/hadoop/datanode1:/hadoop_data/dfs/data
       - etl_data:/glustervol1
     ports:
       - "8888:8888" # Jupyter
@@ -152,9 +156,3 @@ volumes:
       type: none
       o: bind
       device: /media/glusterfs
-  hadoop_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /media/data/hadoop

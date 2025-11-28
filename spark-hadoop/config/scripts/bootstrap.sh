@@ -8,9 +8,9 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
     echo "[BOOTSTRAP] Starting MASTER node"
 
     # Initialize HDFS only on first run
-    if [ ! -d "/hadoop_data/data/nameNode/current" ]; then
+    if [ ! -d "/hadoop_data/dfs/name/current" ]; then
         echo "[BOOTSTRAP] Formatting NameNode..."
-        hdfs namenode -format -force
+        hdfs namenode -format -forcee -nonInteractive
     else
         echo "[BOOTSTRAP] NameNode already formatted."
     fi
@@ -19,7 +19,7 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
     $HADOOP_HOME/sbin/start-dfs.sh
     $HADOOP_HOME/sbin/start-yarn.sh
 
-    sleep 5
+    sleep 8
 
     # Start Spark Master (only because you want WebUI — YARN will be used for jobs)
     $SPARK_HOME/sbin/start-master.sh
@@ -30,6 +30,7 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
     hdfs dfs -mkdir -p /datasets /datasets_processed /spark-logs /shared-libs 2>/dev/null || true
     hdfs dfs -chmod 1777 /spark-logs 2>/dev/null || true
     hdfs dfs -put -f $SPARK_HOME/jars/* /shared-libs/ 2>/dev/null || true
+    hdfs dfs -chown -R yarn:hadoop /shared-libs 2>/dev/null || true
 
     # Sai do Safe Mode (necessário após o primeiro start-dfs.sh)
     hdfs dfsadmin -safemode leave 2>/dev/null || true
