@@ -97,8 +97,6 @@ RUN wget http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/h
     wget http://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}.tgz && \
     tar zxvf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}.tgz -C /usr/ && \
     rm spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}.tgz && \
-        # REMOVE TODOS OS JARs DO KRYO (MATA NA RAIZ)
-    rm -f ${SPARK_HOME}/jars/kryo*.jar && \
     chown -R root:root ${SPARK_HOME} 
 
 # ---------- CRITICAL FIX: Create config dir BEFORE copying configs ----------
