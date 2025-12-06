@@ -43,9 +43,8 @@ ENV HDFS_SECONDARYNAMENODE_USER=root
 ENV YARN_RESOURCEMANAGER_USER=root
 ENV YARN_NODEMANAGER_USER=root
 
-
 # ---------- JVM Options ----------
- # JVM Options (add-opens para Java 17)
+# JVM Options (add-opens para Java 17)
 ENV HADOOP_OPTS="-XX:+IgnoreUnrecognizedVMOptions \
 --add-opens=java.base/java.lang=ALL-UNNAMED \
 --add-opens=java.base/java.lang.reflect=ALL-UNNAMED \
@@ -55,6 +54,11 @@ ENV HADOOP_OPTS="-XX:+IgnoreUnrecognizedVMOptions \
 --add-opens=java.base/sun.nio.ch=ALL-UNNAMED \
 --add-opens=java.base/java.util=ALL-UNNAMED \
 --add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED"
+
+# THIS IS THE MAGIC — THESE 2 LINES FORCE THE JVM OPTIONS ON EXECUTORS AND DRIVER
+# YARN ONLY RESPECTS THESE VARIABLES 100% OF THE TIME
+ENV SPARK_EXECUTOR_JAVA_OPTS="--add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED"
+ENV SPARK_DRIVER_JAVA_OPTS="--add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED"
 
 
 # ---------- Dependencies ----------
@@ -123,10 +127,10 @@ RUN echo "export JAVA_HOME=${JAVA_HOME}" >> ${HADOOP_CONF_DIR}/hadoop-env.sh && 
     echo "export YARN_NODEMANAGER_USER=root" >> ${HADOOP_CONF_DIR}/yarn-env.sh
 
 # Add-opens patches
-RUN sed -i '/^# *export HADOOP_OPTS=/a export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
-      $HADOOP_CONF_DIR/hadoop-env.sh && \
-    sed -i '/^# *export YARN_RESOURCEMANAGER_OPTS=/a export YARN_RESOURCEMANAGER_OPTS="$YARN_RESOURCEMANAGER_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
-      $HADOOP_CONF_DIR/yarn-env.sh
+#RUN sed -i '/^# *export HADOOP_OPTS=/a export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
+#      $HADOOP_CONF_DIR/hadoop-env.sh && \
+#    sed -i '/^# *export YARN_RESOURCEMANAGER_OPTS=/a export YARN_RESOURCEMANAGER_OPTS="$YARN_RESOURCEMANAGER_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
+#      $HADOOP_CONF_DIR/yarn-env.sh
 
 # Expose ports
 EXPOSE 8042 9870 18080 9000 4040 8020 22 8080 7077 8081 8088 6066 8030 8031 8032
