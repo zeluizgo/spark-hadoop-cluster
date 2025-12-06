@@ -86,7 +86,7 @@ RUN wget https://downloads.lightbend.com/scala/${SCALA_VERSION}/scala-${SCALA_VE
     mv /usr/scala-${SCALA_VERSION} /usr/scala && \
     ln -s /usr/scala/bin/* /usr/bin/
 
-# ---------- Hadoop, Spark, Hive ----------
+# ---------- Hadoop, Spark ----------
          # Hadoop
 RUN wget http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz && \
     tar zxvf hadoop-${HADOOP_VERSION}.tar.gz -C /usr/ && \
@@ -103,12 +103,10 @@ RUN wget http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/h
 RUN mkdir -p ${HADOOP_CONF_DIR} ${SPARK_CONF_DIR}
 
 # ---------- Config files ----------
-COPY config/hive/*.xml ${SPARK_HOME}/conf/
 COPY config/hadoop/masters ${HADOOP_CONF_DIR}/
 COPY config/hadoop/slaves ${HADOOP_CONF_DIR}/
 COPY config/spark ${SPARK_HOME}/conf/
 COPY config/hadoop/*.xml ${HADOOP_CONF_DIR}/
-COPY config/hive/*.xml ${HADOOP_CONF_DIR}/
 COPY config/scripts /
 
 # Java/Hadoop env fixes
