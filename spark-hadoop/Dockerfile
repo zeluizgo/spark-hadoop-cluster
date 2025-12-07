@@ -132,6 +132,12 @@ RUN echo "export JAVA_HOME=${JAVA_HOME}" >> ${HADOOP_CONF_DIR}/hadoop-env.sh && 
 #    sed -i '/^# *export YARN_RESOURCEMANAGER_OPTS=/a export YARN_RESOURCEMANAGER_OPTS="$YARN_RESOURCEMANAGER_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
 #      $HADOOP_CONF_DIR/yarn-env.sh
 
+# in Dockerfile (or run inside container)
+RUN sed -i '/^# *export YARN_RESOURCEMANAGER_OPTS=/a export YARN_RESOURCEMANAGER_OPTS="$YARN_RESOURCEMANAGER_OPTS --add-opens=java.base\/java.lang=ALL-UNNAMED --add-opens=java.base\/java.lang.reflect=ALL-UNNAMED --add-opens=java.base\/java.lang.invoke=ALL-UNNAMED --add-opens=java.base\/java.io=ALL-UNNAMED --add-opens=java.base\/java.net=ALL-UNNAMED --add-opens=java.base\/java.nio=ALL-UNNAMED --add-opens=java.base\/sun.nio.ch=ALL-UNNAMED --add-opens=java.base\/java.util=ALL-UNNAMED"' \
+    ${HADOOP_CONF_DIR}/yarn-env.sh
+
+ENV JAVA_TOOL_OPTIONS="--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED"
+
 # Expose ports
 EXPOSE 8042 9870 18080 9000 4040 8020 22 8080 7077 8081 8088 6066 8030 8031 8032
 
