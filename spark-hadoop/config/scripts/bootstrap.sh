@@ -3,6 +3,12 @@
 set -e
 
 /etc/init.d/ssh start
+echo "[BOOTSTRAP] Configuring Hadoop for hostname: $(hostname -f)"
+# replace token
+for f in ${HADOOP_CONF_DIR}/*.xml; do
+    sed -i "s/\${HOSTNAME}/$(hostname -f)/g" "$f"
+done
+
 
 if [[ "$HOSTNAME" == "spark-master" ]]; then
     echo "[BOOTSTRAP] Starting MASTER node"
