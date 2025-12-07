@@ -8,6 +8,7 @@ services:
     volumes:
       - /home/ubuntu/projects:/user_data
       - /media/data/hadoop/namenode:/hadoop_data/dfs/name          # ← NameNode only
+      - /media/shared-jars:/shared-jars
       - /media/data/hadoop/logs/namenode:/hadoop_data/logs
       - etl_data:/glustervol1
     ports:
@@ -43,6 +44,7 @@ services:
     tty: true
     volumes:
       - /media/data/hadoop/datanode:/hadoop_data/dfs/data          # ← LOCAL disk on THIS Pi
+      - /media/shared-jars:/shared-jars
       - /media/data/hadoop/logs/worker1:/hadoop_data/logs
       - etl_data:/glustervol1
     depends_on:
@@ -71,6 +73,7 @@ services:
     tty: true
     volumes:
       - /media/data/hadoop/datanode:/hadoop_data/dfs/data          # ← LOCAL disk on THIS Pi
+      - /media/shared-jars:/shared-jars
       - /media/data/hadoop/logs/worker2:/hadoop_data/logs
       - etl_data:/glustervol1
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
@@ -102,6 +105,7 @@ services:
     tty: true
     volumes:
       - /media/data/hadoop/datanode:/hadoop_data/dfs/data          # ← LOCAL disk on THIS Pi
+      - /media/shared-jars:/shared-jars
       - /media/data/hadoop/logs/worker3:/hadoop_data/logs
       - etl_data:/glustervol1
     depends_on:
