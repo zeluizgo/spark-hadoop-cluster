@@ -5,7 +5,7 @@ FROM --platform=linux/arm64 eclipse-temurin:17-jdk-jammy
 ENV SCALA_VERSION=2.13.16
 ENV HADOOP_VERSION=3.4.0
 ENV HADOOP_MINOR_VERSION=3
-ENV SPARK_VERSION=4.0.2
+ENV SPARK_VERSION=4.0.1
 
 
 # ---------- Core Paths ----------
