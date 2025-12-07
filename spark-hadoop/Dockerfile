@@ -133,8 +133,30 @@ RUN echo "export JAVA_HOME=${JAVA_HOME}" >> ${HADOOP_CONF_DIR}/hadoop-env.sh && 
 #      $HADOOP_CONF_DIR/yarn-env.sh
 
 # in Dockerfile (or run inside container)
-RUN sed -i '/^# *export YARN_RESOURCEMANAGER_OPTS=/a export YARN_RESOURCEMANAGER_OPTS="$YARN_RESOURCEMANAGER_OPTS --add-opens=java.base\/java.lang=ALL-UNNAMED --add-opens=java.base\/java.lang.reflect=ALL-UNNAMED --add-opens=java.base\/java.lang.invoke=ALL-UNNAMED --add-opens=java.base\/java.io=ALL-UNNAMED --add-opens=java.base\/java.net=ALL-UNNAMED --add-opens=java.base\/java.nio=ALL-UNNAMED --add-opens=java.base\/sun.nio.ch=ALL-UNNAMED --add-opens=java.base\/java.util=ALL-UNNAMED"' \
+RUN sed -i '/^# *export YARN_RESOURCEMANAGER_OPTS=/a \
+export YARN_RESOURCEMANAGER_OPTS="$YARN_RESOURCEMANAGER_OPTS \
+--add-opens=java.base\/java.lang=ALL-UNNAMED \
+--add-opens=java.base\/java.lang.reflect=ALL-UNNAMED \
+--add-opens=java.base\/java.lang.invoke=ALL-UNNAMED \
+--add-opens=java.base\/java.io=ALL-UNNAMED \
+--add-opens=java.base\/java.net=ALL-UNNAMED \
+--add-opens=java.base\/java.nio=ALL-UNNAMED \
+--add-opens=java.base\/sun.nio.ch=ALL-UNNAMED \
+--add-opens=java.base\/java.util=ALL-UNNAMED"' \
     ${HADOOP_CONF_DIR}/yarn-env.sh
+
+# ✅ FIX NodeManager Java 17 module access (REQUIRED for Pattern 2)
+RUN sed -i '/^# *export YARN_NODEMANAGER_OPTS=/a \
+export YARN_NODEMANAGER_OPTS="$YARN_NODEMANAGER_OPTS \
+--add-opens=java.base/java.lang=ALL-UNNAMED \
+--add-opens=java.base/java.lang.reflect=ALL-UNNAMED \
+--add-opens=java.base/java.lang.invoke=ALL-UNNAMED \
+--add-opens=java.base/java.io=ALL-UNNAMED \
+--add-opens=java.base/java.net=ALL-UNNAMED \
+--add-opens=java.base/java.nio=ALL-UNNAMED \
+--add-opens=java.base/sun.nio.ch=ALL-UNNAMED \
+--add-opens=java.base/java.util=ALL-UNNAMED"' \
+${HADOOP_CONF_DIR}/yarn-env.sh
 
 ENV JAVA_TOOL_OPTIONS="--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED"
 
