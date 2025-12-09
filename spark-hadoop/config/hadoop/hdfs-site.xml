@@ -12,7 +12,7 @@
     <!-- Critical for Raspberry Pi + Docker -->
     <property>
         <name>dfs.datanode.max.transfer.threads</name>
-        <value>4096</value>
+        <value>512</value>
     </property>
     <!-- Critical stability settings for Docker/Pi clusters -->
     <property>
@@ -32,7 +32,8 @@
         <value>NEVER</value>
     </property>
     <property>
-        <name>dfs.replication</name><value>3</value>
+        <name>dfs.replication</name>
+        <value>1</value>
     </property>
     <property>
         <name>dfs.blocksize</name><value>134217728</value>
