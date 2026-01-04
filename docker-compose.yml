@@ -28,6 +28,9 @@ services:
         ipv4_address: 10.5.0.2
     environment:
       - "SPARK_LOCAL_IP=spark-master"
+      - HDFS_CONF_dfs_client_use_datanode_hostname=true
+      - HDFS_CONF_dfs_datanode_use_datanode_hostname=true
+      - HDFS_CONF_dfs_namenode_use_datanode_hostname=true
     deploy:
       placement:
         constraints:
@@ -56,6 +59,9 @@ services:
     environment:
       - "SPARK_LOCAL_IP=spark-worker-1"
       - "SPARK_WORKER_WEBUI_PORT=8081"
+      - HDFS_CONF_dfs_client_use_datanode_hostname=true
+      - HDFS_CONF_dfs_datanode_use_datanode_hostname=true
+      - HDFS_CONF_dfs_namenode_use_datanode_hostname=true
     networks:
       cluster-network:
         ipv4_address: 10.5.0.3
@@ -88,6 +94,9 @@ services:
       - "SPARK_WORKER_WEBUI_PORT=8081"
       - "HADOOP_OPTS=-XX:+IgnoreUnrecognizedVMOptions -XX:-UseContainerSupport --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED   --add-opens=java.base/java.io=ALL-UNNAMED  --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED   --add-opens=java.base/sun.nio.ch=ALL-UNNAMED   --add-opens=java.base/java.util=ALL-UNNAMED   --add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED"
       - "YARN_OPTS=-XX:+IgnoreUnrecognizedVMOptions -XX:-UseContainerSupport --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED   --add-opens=java.base/java.io=ALL-UNNAMED  --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED   --add-opens=java.base/sun.nio.ch=ALL-UNNAMED   --add-opens=java.base/java.util=ALL-UNNAMED   --add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED"
+      - HDFS_CONF_dfs_client_use_datanode_hostname=true
+      - HDFS_CONF_dfs_datanode_use_datanode_hostname=true
+      - HDFS_CONF_dfs_namenode_use_datanode_hostname=true
     networks:
       cluster-network:
         ipv4_address: 10.5.0.4
@@ -117,6 +126,9 @@ services:
     environment:
       - "SPARK_LOCAL_IP=spark-worker-3"
       - "SPARK_WORKER_WEBUI_PORT=8083"
+      - HDFS_CONF_dfs_client_use_datanode_hostname=true
+      - HDFS_CONF_dfs_datanode_use_datanode_hostname=true
+      - HDFS_CONF_dfs_namenode_use_datanode_hostname=true
     networks:
       cluster-network:
         ipv4_address: 10.5.0.5
@@ -138,6 +150,10 @@ services:
       - etl_data:/glustervol1
     ports:
       - "8888:8888" # Jupyter
+    environment:
+      - HDFS_CONF_dfs_client_use_datanode_hostname=true
+      - HDFS_CONF_dfs_datanode_use_datanode_hostname=true
+      - HDFS_CONF_dfs_namenode_use_datanode_hostname=true
     networks:
       cluster-network:
         ipv4_address: 10.5.0.7
