@@ -40,7 +40,7 @@
     </property> <!-- 128MB -->
     <property>
         <name>dfs.datanode.failed.volumes.tolerated</name>
-        <value>10</value>  <!-- or -1 to tolerate all failures -->
+        <value>0</value>  <!-- or -1 to tolerate all failures -->
     </property>
     <property>
         <name>dfs.datanode.handler.count</name>
