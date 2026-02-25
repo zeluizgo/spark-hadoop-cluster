@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   spark-master:
-    image: spark-hadoop-cluster:latest
+    image: ubuntu-pi-03.local:5000/spark-hadoop-cluster:latest
     container_name: spark-master
     hostname: spark-master
     tty: true
@@ -41,7 +41,7 @@ services:
       - no-new-privileges:false
     privileged: true
   spark-worker-1:
-    image: spark-hadoop-cluster:latest
+    image: ubuntu-pi-03.local:5000/spark-hadoop-cluster:latest
     container_name: spark-worker-1
     hostname: spark-worker-1
     tty: true
@@ -73,7 +73,7 @@ services:
       - no-new-privileges:false
     privileged: true
   spark-worker-2:
-    image: spark-hadoop-cluster:latest
+    image: ubuntu-pi-03.local:5000/spark-hadoop-cluster:latest
     container_name: spark-worker-2
     hostname: spark-worker-2
     tty: true
@@ -108,7 +108,7 @@ services:
       - no-new-privileges:false
     privileged: true
   spark-worker-3:
-    image: spark-hadoop-cluster:latest
+    image: ubuntu-pi-03.local:5000/spark-hadoop-cluster:latest
     container_name: spark-worker-3
     hostname: spark-worker-3
     tty: true
@@ -140,7 +140,7 @@ services:
       - no-new-privileges:false
     privileged: true
   jupyter:
-    image: jupyter:latest
+    image: ubuntu-pi-03.local:5000/jupyter:latest
     container_name: jupyter
     hostname: jupyter
     tty: true
