@@ -67,8 +67,10 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
     echo "[BOOTSTRAP] Starting Spark History Server in foreground..."
     # We run it in foreground so the container stays alive because of it
     # (you can still access other UIs)
+    
 
     exec $SPARK_HOME/bin/spark-class org.apache.spark.deploy.history.HistoryServer \
+        -Dspark.history.ui.bindHost=0.0.0.0 \
         > "$SPARK_HOME/logs/history-server.log" 2>&1
 
     echo "MASTER totalmente pronto!"
