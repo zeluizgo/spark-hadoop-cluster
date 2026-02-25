@@ -68,9 +68,10 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
     # We run it in foreground so the container stays alive because of it
     # (you can still access other UIs)
     
+    # Force Spark web UIs (including HistoryServer) to listen on all network interfaces
+    export SPARK_LOCAL_IP=0.0.0.0
 
     exec $SPARK_HOME/bin/spark-class org.apache.spark.deploy.history.HistoryServer \
-        -Dspark.history.ui.bindHost=0.0.0.0 \
         > "$SPARK_HOME/logs/history-server.log" 2>&1
 
     echo "MASTER totalmente pronto!"
