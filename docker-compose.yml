@@ -8,6 +8,7 @@ services:
     volumes:
       - /home/ubuntu/projects:/user_data
       - /media/data/hadoop/namenode:/hadoop_data/dfs/name          # ← NameNode only
+      - /media/data/hadoop/datanode:/hadoop_data/dfs/data         # ← DataNode only (for testing, not recommended for production)
       - /media/shared-jars:/shared-jars
       - /media/data/hadoop/logs/namenode:/hadoop_data/logs
       - etl_data:/glustervol1
