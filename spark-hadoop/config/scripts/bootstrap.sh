@@ -23,6 +23,17 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
 
     # Start HDFS + YARN ResourceManager
     $HADOOP_HOME/sbin/start-dfs.sh
+
+    echo "[BOOTSTRAP] Also starting DataNode on master node"
+    # Same command you use on workers
+    nohup java -cp "${HADOOP_HOME}/etc/hadoop:${HADOOP_HOME}/share/hadoop/common/*:${HADOOP_HOME}/share/hadoop/common/lib/*:${HADOOP_HOME}/share/hadoop/hdfs/*:${HADOOP_HOME}/share/hadoop/thirdparty/*" \
+         -Dproc_datanode \
+         -Dhadoop.log.dir=${HADOOP_HOME}/logs \
+         -Dhadoop.log.file=hadoop-root-datanode-$(hostname).log \
+         -Dhadoop.root.logger=INFO,console \
+         org.apache.hadoop.hdfs.server.datanode.DataNode \
+         > ${HADOOP_HOME}/logs/datanode-master.log 2>&1 &
+
     $HADOOP_HOME/sbin/start-yarn.sh
 
     sleep 8
@@ -41,13 +52,24 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
     # Sai do Safe Mode (necessário após o primeiro start-dfs.sh)
     hdfs dfsadmin -safemode leave 2>/dev/null || true
 
-    # Spark History Server — versão que NUNCA morre (Spark 4.0.1)
-    echo "[BOOTSTRAP] Starting Spark History Server (versão infalível)..."
-    hdfs dfs -mkdir -p hdfs://spark-master:9000/spark-logs 2>/dev/null || true
-    hdfs dfs -chmod 1777 hdfs://spark-master:9000/spark-logs 2>/dev/null || true
+    echo "[BOOTSTRAP] Waiting for HDFS to become fully ready..."
+    until hdfs dfsadmin -report | grep "Live datanodes" | grep -q "[1-9]"; do
+        echo "Waiting for at least one live DataNode..."
+        sleep 5
+    done
+    echo "HDFS looks alive → proceeding"
 
-    nohup $SPARK_HOME/bin/spark-class org.apache.spark.deploy.history.HistoryServer \
-        > $SPARK_HOME/logs/history-server.log 2>&1 &
+    echo "[BOOTSTRAP] Ensuring spark event log directory exists..."
+    EVENTLOG_DIR="hdfs://spark-master:9000/spark-logs"
+    hdfs dfs -mkdir -p "$EVENTLOG_DIR" || true
+    hdfs dfs -chmod 1777 "$EVENTLOG_DIR" || true
+
+    echo "[BOOTSTRAP] Starting Spark History Server in foreground..."
+    # We run it in foreground so the container stays alive because of it
+    # (you can still access other UIs)
+
+    exec $SPARK_HOME/bin/spark-class org.apache.spark.deploy.history.HistoryServer \
+        > "$SPARK_HOME/logs/history-server.log" 2>&1
 
     echo "MASTER totalmente pronto!"
     echo "   NameNode UI      → http://$(hostname -I | awk '{print $1}'):9870"
