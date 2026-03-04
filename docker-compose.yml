@@ -12,6 +12,7 @@ services:
       - /media/shared-jars:/shared-jars
       - /media/data/hadoop/logs/namenode:/hadoop_data/logs
       - etl_data:/glustervol1
+      - /home/ubuntu/.ssh:/home/appuser/.ssh:ro
     ports:
       - "8088:8088" # ResourceManager
       - "8032:8032"   # ✅ ADD THIS - ResourceManager RPC
@@ -51,6 +52,7 @@ services:
       - /media/shared-jars:/shared-jars
       - /media/data/hadoop/logs/worker1:/hadoop_data/logs
       - etl_data:/glustervol1
+      - /home/ubuntu/.ssh:/home/appuser/.ssh:ro
     depends_on:
       - spark-master
     ports:
@@ -83,6 +85,7 @@ services:
       - /media/shared-jars:/shared-jars
       - /media/data/hadoop/logs/worker2:/hadoop_data/logs
       - etl_data:/glustervol1
+      - /home/ubuntu/.ssh:/home/appuser/.ssh:ro
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     depends_on:
       - spark-master
@@ -118,6 +121,7 @@ services:
       - /media/shared-jars:/shared-jars
       - /media/data/hadoop/logs/worker3:/hadoop_data/logs
       - etl_data:/glustervol1
+      - /home/ubuntu/.ssh:/home/appuser/.ssh:ro
     depends_on:
       - spark-master
     ports:

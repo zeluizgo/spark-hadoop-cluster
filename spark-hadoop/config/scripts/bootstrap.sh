@@ -9,6 +9,20 @@ for f in ${HADOOP_CONF_DIR}/*.xml; do
     sed -i "s/\${HOSTNAME}/$(hostname -f)/g" "$f"
 done
 
+# -------------------------
+# 2. Create non-root user
+# -------------------------
+echo "[BOOTSTRAP] Create non-root user 'appuser' for running outside applications (optional but recommended)"
+useradd -m -s /bin/bash appuser
+
+# -------------------------
+# 3. Prepare SSH directory
+# -------------------------
+echo "[BOOTSTRAP] Preparing SSH directory for 'appuser' (required for outside applications to use SSH)"
+
+mkdir -p /home/appuser/.ssh && \
+chmod 700 /home/appuser/.ssh && \
+chown -R appuser:appuser /home/appuser/.ssh
 
 if [[ "$HOSTNAME" == "spark-master" ]]; then
     echo "[BOOTSTRAP] Starting MASTER node"
@@ -34,21 +48,27 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
          org.apache.hadoop.hdfs.server.datanode.DataNode \
          > ${HADOOP_HOME}/logs/datanode-master.log 2>&1 &
 
+    echo "[BOOTSTRAP] Starting YARN ResourceManager..."
     $HADOOP_HOME/sbin/start-yarn.sh
 
     sleep 8
 
+    echo "[BOOTSTRAP] Starting Master NodeManager (for testing and WebUI purposes)"
     # Start Spark Master (only because you want WebUI — YARN will be used for jobs)
     $SPARK_HOME/sbin/start-master.sh
 
     sleep 10
 
+
+    echo "[BOOTSTRAP] creating HDFS directories..."
     # Cria diretórios essenciais no HDFS
     hdfs dfs -mkdir -p /datasets /datasets_processed /spark-logs /shared-libs 2>/dev/null || true
     hdfs dfs -chmod 1777 /spark-logs 2>/dev/null || true
     hdfs dfs -put -f $SPARK_HOME/jars/* /shared-libs/ 2>/dev/null || true
     hdfs dfs -chown -R yarn:hadoop /shared-libs 2>/dev/null || true
 
+
+    echo "[BOOTSTRAP] Leaving HDFS Safe Mode (if still in safe mode)..."
     # Sai do Safe Mode (necessário após o primeiro start-dfs.sh)
     hdfs dfsadmin -safemode leave 2>/dev/null || true
 
@@ -71,7 +91,7 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
     # Force Spark web UIs (including HistoryServer) to listen on all network interfaces
     export SPARK_LOCAL_IP=0.0.0.0
 
-    exec $SPARK_HOME/bin/spark-class org.apache.spark.deploy.history.HistoryServer \
+    $SPARK_HOME/bin/spark-class org.apache.spark.deploy.history.HistoryServer \
         > "$SPARK_HOME/logs/history-server.log" 2>&1
 
     echo "MASTER totalmente pronto!"
