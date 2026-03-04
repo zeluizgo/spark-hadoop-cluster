@@ -105,7 +105,6 @@ services:
       cluster-network:
         ipv4_address: 10.5.0.4
     deploy:
-      replicas: 0   # Start with 0 replicas
       placement:
         constraints: [node.role == manager]
     security_opt:
