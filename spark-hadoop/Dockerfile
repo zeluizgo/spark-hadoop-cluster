@@ -103,6 +103,12 @@ RUN wget http://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/h
     rm spark-${SPARK_VERSION}-bin-hadoop${HADOOP_MINOR_VERSION}.tgz && \
     chown -R root:root ${SPARK_HOME} 
 
+# ---------- Delta Lake JARs (Spark 4.0 / Scala 2.13) ----------
+RUN wget https://repo1.maven.org/maven2/io/delta/delta-spark_2.13/4.0.0/delta-spark_2.13-4.0.0.jar \
+        -P ${SPARK_HOME}/jars/ && \
+    wget https://repo1.maven.org/maven2/io/delta/delta-storage/4.0.0/delta-storage-4.0.0.jar \
+        -P ${SPARK_HOME}/jars/
+
 # ---------- CRITICAL FIX: Create config dir BEFORE copying configs ----------
 RUN mkdir -p ${HADOOP_CONF_DIR} ${SPARK_CONF_DIR}
 

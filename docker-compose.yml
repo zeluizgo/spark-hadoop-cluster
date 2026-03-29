@@ -151,6 +151,31 @@ services:
     security_opt:
       - no-new-privileges:false
     privileged: true
+  hive-server:
+    image: ubuntu-pi-03.local:5000/hive:latest
+    container_name: hive-server
+    hostname: hive-server
+    tty: true
+    volumes:
+      - /media/data/hadoop/hive/dump:/hadoop_data/dump
+      - /media/data/hadoop/logs/hive:/usr/hive/logs
+    depends_on:
+      - spark-master
+    ports:
+      - "9083:9083"   # Hive Metastore Thrift
+      - "10000:10000" # HiveServer2
+    networks:
+      cluster-network:
+        ipv4_address: 10.5.0.6
+        aliases:
+          - hive-server
+    deploy:
+      placement:
+        constraints:
+          - node.labels.workerid == 3
+    security_opt:
+      - no-new-privileges:false
+    privileged: true
   jupyter:
     image: ubuntu-pi-03.local:5000/jupyter:latest
     container_name: jupyter

@@ -7,4 +7,8 @@ docker push ubuntu-pi-03:5000/spark-hadoop-cluster
 docker build --platform linux/arm64 -t jupyter -f ./jupyter/Dockerfile-jupyter ./
 docker tag jupyter ubuntu-pi-03:5000/jupyter
 docker push ubuntu-pi-03:5000/jupyter
+
+docker build --platform linux/arm64 -t hive -f ./hive/Dockerfile-hive ./
+docker tag hive ubuntu-pi-03:5000/hive
+docker push ubuntu-pi-03:5000/hive
 #docker stack deploy --compose-file=docker-compose.yml spark-hadoop     
