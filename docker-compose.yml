@@ -28,6 +28,8 @@ services:
     networks:
       cluster-network:
         ipv4_address: 10.5.0.2
+        aliases:
+          - spark-master
     environment:
       - "SPARK_LOCAL_IP=spark-master"
       - HDFS_CONF_dfs_client_use_datanode_hostname=true
@@ -68,6 +70,8 @@ services:
     networks:
       cluster-network:
         ipv4_address: 10.5.0.3
+        aliases:
+          - spark-worker-1
     deploy:
       placement:
         constraints:
@@ -104,6 +108,8 @@ services:
     networks:
       cluster-network:
         ipv4_address: 10.5.0.4
+        aliases:
+          - spark-worker-2
     deploy:
       placement:
         constraints: [node.role == manager]
@@ -136,6 +142,8 @@ services:
     networks:
       cluster-network:
         ipv4_address: 10.5.0.5
+        aliases:
+          - spark-worker-3
     deploy:
       placement:
         constraints:

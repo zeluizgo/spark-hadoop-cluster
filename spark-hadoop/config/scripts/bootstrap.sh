@@ -72,6 +72,12 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
     # Sai do Safe Mode (necessário após o primeiro start-dfs.sh)
     hdfs dfsadmin -safemode leave 2>/dev/null || true
 
+    until hdfs dfsadmin -safemode get 2>/dev/null | grep -q "Safe mode is OFF"; do
+        echo "[BOOTSTRAP] Waiting for HDFS NameNode to exit safe mode..."
+        sleep 10
+    done
+    echo "[BOOTSTRAP] HDFS safe mode is OFF, proceeding."
+
     echo "[BOOTSTRAP] Waiting for HDFS to become fully ready..."
     until hdfs dfsadmin -report | grep "Live datanodes" | grep -q "[1-9]"; do
         echo "Waiting for at least one live DataNode..."

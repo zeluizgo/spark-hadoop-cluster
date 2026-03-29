@@ -29,11 +29,11 @@
     </property>
     <property>
         <name>dfs.client.block.write.replace-datanode-on-failure.policy</name>
-        <value>NEVER</value>
+        <value>DEFAULT</value>
     </property>
     <property>
         <name>dfs.replication</name>
-        <value>1</value>
+        <value>2</value>
     </property>
     <property>
         <name>dfs.blocksize</name><value>134217728</value>
