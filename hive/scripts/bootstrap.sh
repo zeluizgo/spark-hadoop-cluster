@@ -58,7 +58,7 @@ fi
 TABLE_COUNT=$(mysql -u root -Bse "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='metastore';")
 if [ "$TABLE_COUNT" -eq 0 ]; then
     echo "Initializing Hive Metastore schema..."
-    mysql -u root metastore < /usr/hive/scripts/metastore/upgrade/mysql/hive-schema-4.0.0.mysql.sql
+    mysql -u root metastore < /usr/hive/scripts/metastore/upgrade/mysql/hive-schema-3.1.0.mysql.sql
 fi
 
 # ---------------------------
