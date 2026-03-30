@@ -58,6 +58,13 @@ RUN wget \
     # Configurando o JAVA_HOME para os processos localizarem a instalação do Java
 RUN echo "export JAVA_HOME=${JAVA_HOME}" >> /etc/environment
 
+# ---------- Delta Lake JARs (needed by the driver running in this container) ----------
+RUN mkdir -p /opt/delta-jars && \
+    wget https://repo1.maven.org/maven2/io/delta/delta-spark_2.13/4.0.0/delta-spark_2.13-4.0.0.jar \
+        -P /opt/delta-jars/ && \
+    wget https://repo1.maven.org/maven2/io/delta/delta-storage/4.0.0/delta-storage-4.0.0.jar \
+        -P /opt/delta-jars/
+
 COPY /spark-hadoop/config/hadoop/*.xml /usr/hadoop-${HADOOP_VERSION}/etc/hadoop/
 COPY /jupyter/scripts /
 
