@@ -52,4 +52,12 @@
                 <name>yarn.nodemanager.container-metrics.enable</name>
                 <value>false</value>
         </property>
+        <property>
+                <name>yarn.web-proxy.address</name>
+                <value>spark-master:8088</value>
+        </property>
+        <property>
+                <name>yarn.resourcemanager.webapp.cross-origin.enabled</name>
+                <value>true</value>
+        </property>
 </configuration>

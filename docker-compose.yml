@@ -188,6 +188,7 @@ services:
     ports:
       - "8888:8888" # Jupyter
     environment:
+      - SPARK_LOCAL_IP=jupyter
       - HDFS_CONF_dfs_client_use_datanode_hostname=true
       - HDFS_CONF_dfs_datanode_use_datanode_hostname=true
       - HDFS_CONF_dfs_namenode_use_datanode_hostname=true
