@@ -201,7 +201,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.workerid == 2
+          - node.labels.workerid == 1
 networks:
   cluster-network:
     driver: overlay
