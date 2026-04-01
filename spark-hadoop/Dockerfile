@@ -42,6 +42,7 @@ ENV HDFS_NAMENODE_USER=root
 ENV HDFS_SECONDARYNAMENODE_USER=root
 ENV YARN_RESOURCEMANAGER_USER=root
 ENV YARN_NODEMANAGER_USER=root
+ENV YARN_PROXYSERVER_USER=root
 
 # ---------- JVM Options ----------
 # JVM Options (add-opens para Java 17)
@@ -130,7 +131,8 @@ RUN echo "export JAVA_HOME=${JAVA_HOME}" >> ${HADOOP_CONF_DIR}/hadoop-env.sh && 
     echo "export HDFS_SECONDARYNAMENODE_USER=root" >> ${HADOOP_CONF_DIR}/hadoop-env.sh && \
     echo "export HADOOP_SECURE_DN_USER=root" >> ${HADOOP_CONF_DIR}/hadoop-env.sh && \
     echo "export YARN_RESOURCEMANAGER_USER=root" >> ${HADOOP_CONF_DIR}/yarn-env.sh && \
-    echo "export YARN_NODEMANAGER_USER=root" >> ${HADOOP_CONF_DIR}/yarn-env.sh
+    echo "export YARN_NODEMANAGER_USER=root" >> ${HADOOP_CONF_DIR}/yarn-env.sh && \
+    echo "export YARN_PROXYSERVER_USER=root" >> ${HADOOP_CONF_DIR}/yarn-env.sh
 
 # Add-opens patches
 #RUN sed -i '/^# *export HADOOP_OPTS=/a export HADOOP_OPTS="$HADOOP_OPTS --add-opens java.base\/java.lang=ALL-UNNAMED"' \
