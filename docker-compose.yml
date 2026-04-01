@@ -187,6 +187,7 @@ services:
       - etl_data:/glustervol1
     ports:
       - "8888:8888" # Jupyter
+      - "4040:4040" # Spark UI (driver)
     environment:
       - SPARK_LOCAL_IP=jupyter
       - HDFS_CONF_dfs_client_use_datanode_hostname=true
@@ -195,6 +196,8 @@ services:
     networks:
       cluster-network:
         ipv4_address: 10.5.0.7
+        aliases:
+          - jupyter
     deploy:
       placement:
         constraints:
