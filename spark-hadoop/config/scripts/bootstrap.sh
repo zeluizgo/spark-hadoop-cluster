@@ -90,17 +90,14 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
     hdfs dfs -mkdir -p "$EVENTLOG_DIR" || true
     hdfs dfs -chmod 1777 "$EVENTLOG_DIR" || true
 
-    echo "[BOOTSTRAP] Starting Spark History Server in foreground..."
-    # We run it in foreground so the container stays alive because of it
-    # (you can still access other UIs)
-    
+    echo "[BOOTSTRAP] Starting Spark History Server in background..."
     # Force Spark web UIs (including HistoryServer) to listen on all network interfaces
     export SPARK_LOCAL_IP=0.0.0.0
 
-    $SPARK_HOME/bin/spark-class org.apache.spark.deploy.history.HistoryServer \
-        > "$SPARK_HOME/logs/history-server.log" 2>&1
+    nohup $SPARK_HOME/bin/spark-class org.apache.spark.deploy.history.HistoryServer \
+        > "$SPARK_HOME/logs/history-server.log" 2>&1 &
 
-    echo "MASTER totalmente pronto!"
+    echo "[BOOTSTRAP] MASTER totalmente pronto!"
     echo "   NameNode UI      → http://$(hostname -I | awk '{print $1}'):9870"
     echo "   YARN UI          → http://$(hostname -I | awk '{print $1}'):8088"
     echo "   Spark Master UI  → http://$(hostname -I | awk '{print $1}'):8080"
