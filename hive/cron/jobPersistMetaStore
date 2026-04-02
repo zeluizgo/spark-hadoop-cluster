@@ -1,1 +1,1 @@
-* 0,4,8,12,16,20 * * * mysqldump metastore > /hadoop_data/dump/metastore_dump
+0 0,4,8,12,16,20 * * * mysqldump metastore > /hadoop_data/dump/metastore_dump
