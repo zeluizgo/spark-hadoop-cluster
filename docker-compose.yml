@@ -38,7 +38,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.workerid == 3
+          - node.labels.workerid == 1
     extra_hosts:
       - "spark:10.5.0.2"
     security_opt:
@@ -112,7 +112,8 @@ services:
           - spark-worker-2
     deploy:
       placement:
-        constraints: [node.role == manager]
+        constraints:
+          - node.labels.workerid == 3
     security_opt:
       - no-new-privileges:false
     privileged: true
@@ -147,7 +148,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.workerid == 1
+          - node.labels.workerid == 4
     security_opt:
       - no-new-privileges:false
     privileged: true
@@ -201,7 +202,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.workerid == 1
+          - node.labels.workerid == 3
 networks:
   cluster-network:
     driver: overlay
