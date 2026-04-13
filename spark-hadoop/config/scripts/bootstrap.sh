@@ -38,16 +38,6 @@ if [[ "$HOSTNAME" == "spark-master" ]]; then
     # Start HDFS + YARN ResourceManager
     $HADOOP_HOME/sbin/start-dfs.sh
 
-    echo "[BOOTSTRAP] Also starting DataNode on master node"
-    # Same command you use on workers
-    nohup java -cp "${HADOOP_HOME}/etc/hadoop:${HADOOP_HOME}/share/hadoop/common/*:${HADOOP_HOME}/share/hadoop/common/lib/*:${HADOOP_HOME}/share/hadoop/hdfs/*:${HADOOP_HOME}/share/hadoop/thirdparty/*" \
-         -Dproc_datanode \
-         -Dhadoop.log.dir=${HADOOP_HOME}/logs \
-         -Dhadoop.log.file=hadoop-root-datanode-$(hostname).log \
-         -Dhadoop.root.logger=INFO,console \
-         org.apache.hadoop.hdfs.server.datanode.DataNode \
-         > ${HADOOP_HOME}/logs/datanode-master.log 2>&1 &
-
     echo "[BOOTSTRAP] Starting YARN ResourceManager..."
     $HADOOP_HOME/sbin/start-yarn.sh
 
