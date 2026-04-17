@@ -172,7 +172,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.workerid == 3
+          - node.labels.workerid == 1
     security_opt:
       - no-new-privileges:false
     privileged: true
