@@ -1,4 +1,4 @@
-FROM --platform=linux/arm64 eclipse-temurin:17-jdk-jammy
+FROM eclipse-temurin:17-jdk-jammy
 
 
 # ---------- Versions ----------
