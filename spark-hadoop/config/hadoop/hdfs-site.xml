@@ -31,6 +31,11 @@
         <name>dfs.client.block.write.replace-datanode-on-failure.policy</name>
         <value>DEFAULT</value>
     </property>
+    <!-- Write succeeds as soon as 1 replica lands; HDFS re-replicates to target asynchronously -->
+    <property>
+        <name>dfs.namenode.replication.min</name>
+        <value>1</value>
+    </property>
     <property>
         <name>dfs.replication</name>
         <value>3</value>
