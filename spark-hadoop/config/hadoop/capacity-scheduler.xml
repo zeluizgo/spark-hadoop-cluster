@@ -77,14 +77,24 @@
     <value>0.2</value>
   </property>
 
-  <!-- Hard cap: no app in spring queue can exceed 1024 MB -->
+  <!-- Hard cap per app in spring queue -->
   <property>
     <name>yarn.scheduler.capacity.root.spring.maximum-allocation-mb</name>
-    <value>2048</value>
+    <value>3072</value>
   </property>
   <property>
     <name>yarn.scheduler.capacity.root.spring.maximum-allocation-vcores</name>
-    <value>2</value>
+    <value>4</value>
+  </property>
+
+  <!-- Hard cap per app in jupyter queue -->
+  <property>
+    <name>yarn.scheduler.capacity.root.jupyter.maximum-allocation-mb</name>
+    <value>3072</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.capacity.root.jupyter.maximum-allocation-vcores</name>
+    <value>4</value>
   </property>
 
 
