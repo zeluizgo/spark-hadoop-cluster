@@ -8,3 +8,6 @@ numpy==1.24.3
 # Jupyter environment
 jupyter
 bash_kernel
+
+# Database clients
+pymongo==3.12.3
