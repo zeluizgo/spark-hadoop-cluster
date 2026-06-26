@@ -83,75 +83,185 @@
 
 ## 4. Cost Estimate (Monthly — Single Developer)
 
-> All prices in USD, Azure East US / Brazil South region, pay-as-you-go.  
-> Prices may vary; always confirm on the Azure pricing calculator.
+> All prices in USD, **Brazil South** region, pay-as-you-go (2025/2026).  
+> ⚠️ Brazil South is ~15-25% more expensive than East US. Always verify on the  
+> [Azure Pricing Calculator](https://azure.microsoft.com/pricing/calculator/) before committing.
 
-### 4.1 Compute — Personal Auto-Scaling Cluster
+---
 
-Each user gets one **All-Purpose Cluster** set to auto-terminate after 30 minutes of inactivity and auto-scale to 0 workers when idle (single-node mode).
+### 4.0 What Is Free vs. What Costs Money
 
-| VM Size | vCPUs | RAM | VM $/hr | DBU/hr (Premium) | DBU $/hr | **Total $/hr** |
-|---|---|---|---|---|---|---|
-| Standard_DS2_v2 | 2 | 7 GB | $0.094 | 1.5 | $0.54 | **~$0.63** |
-| Standard_DS3_v2 | 4 | 14 GB | $0.188 | 2.75 | $0.99 | **~$1.18** |
-| Standard_DS4_v2 | 8 | 28 GB | $0.376 | 5.5 | $1.98 | **~$2.36** |
+This matters because some things look "included" but still generate compute charges:
 
-**Recommendation**: Start with **DS2_v2** (sufficient for exploratory notebooks).
-
-| Usage Pattern | Hours/Month | Est. Monthly Cost (DS2_v2 Premium) |
+| Component | Free? | Real situation |
 |---|---|---|
-| Very light (1h/day, 20 days) | 20 h | **~$13** |
-| Light (2h/day, 20 days) | 40 h | **~$25** |
-| Moderate (4h/day, 20 days) | 80 h | **~$50** |
-| Heavy (8h/day, 22 days) | 176 h | **~$111** |
+| Databricks workspace (the shell) | ✅ Free | No flat fee for the workspace itself |
+| Unity Catalog (the catalog service) | ✅ Free | No charge for the catalog metadata layer |
+| Databricks Assistant (AI code copilot in notebooks) | ✅ Free | Included in Premium — runs on your existing cluster |
+| ADLS Gen2 storage | ❌ Not free | ~$0.023/GB/month + transaction fees |
+| Your personal all-purpose cluster | ❌ Not free | Billed per DBU × hours running |
+| SQL Warehouse (needed for Genie + Power BI) | ❌ Not free | Separate resource, billed per DBU consumed |
+| AI/BI Genie (natural language queries) | ❌ Not free | Uses a SQL Warehouse to run the generated SQL — you pay for that compute |
+| Power BI Desktop (local app) | ✅ Free | Runs on your Windows PC, no Azure charge |
+| Power BI Service / sharing | ❌ $10/user/month | Only needed if publishing to the web |
+| Google Looker Studio | ✅ Free | Connects to Databricks SQL via JDBC |
+| Azure Key Vault | ~Free | $0.03/10,000 operations → $0.30/month typical |
 
-> Auto-terminate means you only pay when the cluster is actively running. A 30-minute idle timeout is very effective at controlling costs.
+**Key insight**: The two compute resources (personal cluster and SQL Warehouse) are **separate meters** that run in parallel if you use them simultaneously. Most of your bill will be these two.
 
-### 4.2 Storage — ADLS Gen2
+---
 
-| Tier | Price | 50 GB/month | 200 GB/month |
+### 4.1 Compute — Personal All-Purpose Cluster (Notebooks)
+
+All-Purpose clusters (for interactive notebook use) have the **highest DBU rate** in Databricks — they are not the same rate as a SQL Warehouse. This is the biggest cost driver.
+
+**DBU rates (Premium, Brazil South — approximate):**
+
+| VM Size | vCPUs | RAM | VM $/hr | DBU/hr | DBU rate (Premium) | DBU $/hr | **Total $/hr** |
+|---|---|---|---|---|---|---|---|
+| Standard_DS2_v2 | 2 | 7 GB | ~$0.14 | 1.5 | ~$0.55/DBU | ~$0.83 | **~$0.97** |
+| Standard_DS3_v2 | 4 | 14 GB | ~$0.25 | 2.75 | ~$0.55/DBU | ~$1.51 | **~$1.76** |
+| Standard_DS4_v2 | 8 | 28 GB | ~$0.50 | 5.5 | ~$0.55/DBU | ~$3.03 | **~$3.53** |
+
+> The DBU rate of ~$0.55/DBU (Premium All-Purpose, Brazil South) is higher than East US (~$0.40/DBU). Premium is required for Unity Catalog.
+
+**Monthly cost by usage (DS2_v2, 30-min auto-terminate):**
+
+| Usage Pattern | Active hours/month | Cluster cost |
+|---|---|---|
+| Very light (1h/day, 20 days) | 20 h | **~$19** |
+| Light (2h/day, 20 days) | 40 h | **~$39** |
+| Moderate (4h/day, 20 days) | 80 h | **~$78** |
+| Heavy (8h/day, 22 days) | 176 h | **~$171** |
+
+> Auto-terminate after 30 min idle is critical. A cluster left running overnight (8h idle) costs ~$8 for nothing. Set the timeout and you only pay for real work time.
+
+---
+
+### 4.2 Compute — SQL Warehouse (for AI/BI Genie + Power BI)
+
+This is a **separate resource** from your personal cluster. You cannot use your notebook cluster to serve Power BI or Genie — these require a SQL Warehouse.
+
+**Good news**: Serverless SQL Warehouse auto-suspends after ~5 minutes of inactivity and only bills for time actually executing queries.
+
+| Option | DBU rate (Brazil South) | Min billing | Auto-suspend |
 |---|---|---|---|
-| LRS (locally redundant) | $0.018/GB | $0.90 | $3.60 |
-| ZRS (zone redundant) | $0.023/GB | $1.15 | $4.60 |
+| Serverless SQL Warehouse | ~$0.36/DBU | Per query | ✅ Yes (~5 min) |
+| Classic SQL Warehouse 2X-Small | ~$0.55/DBU | 10 min blocks | ✅ Yes (configurable) |
 
-**Recommendation**: LRS for dev/personal data, ZRS if you need high availability.
+**Serverless is strongly recommended** for light Genie + BI use.
 
-### 4.3 SQL Warehouse (for Power BI / AI Genie)
+Realistic monthly estimate for moderate Genie use (50 questions/month) + Power BI refresh (daily, 30 tables):
+- Genie: 50 questions × avg 2 min query time = 100 min = 1.67h
+- BI refresh: 30 days × 1 min = 30 min = 0.5h
+- Total active: ~2.2 hours/month × ~0.5 DBU (serverless scales to match query size)
+- Cost: 2.2h × 0.5 DBU × $0.36 = **~$0.40** in DBUs — nearly nothing for very light use
 
-| Option | Cost | Notes |
-|---|---|---|
-| Serverless SQL Warehouse | ~$0.22/DBU (Serverless) | Only pays while running queries; auto-suspends |
-| Classic SQL Warehouse (2X-Small) | ~$0.36/DBU | Minimum 10-minute billing |
+However with minimum 1-min billing and startup overhead, a realistic budget for moderate use:
 
-For BI/reporting with low query frequency: **Serverless** is cheapest (bills per-query, not per-hour).
-
-Estimate: 100 dashboard queries/month × ~0.1 min avg = **< $5/month**.
-
-### 4.4 Unity Catalog
-
-Included in Premium workspace at no extra charge.
-
-### 4.5 Azure Key Vault
-
-~$0.03/10,000 operations. Negligible: **< $1/month**.
-
-### 4.6 Power BI
-
-| Option | Cost |
+| Genie + BI use level | Estimated SQL WH cost/month |
 |---|---|
-| Power BI Desktop (local app) | **Free** |
-| Power BI Service Pro (sharing) | $10/user/month |
-| Google Looker Studio | **Free** (recommended alternative) |
-| Apache Superset (self-hosted) | Free (needs a small VM ~$5/month) |
+| Occasional (few queries/week) | **$1–5** |
+| Regular (daily queries + BI refresh) | **$5–15** |
+| Heavy (many dashboards, frequent Genie) | **$15–40** |
 
-### 4.7 Total Monthly Cost Summary
+---
 
-| Scenario | Compute | Storage | SQL WH | BI | **Total** |
-|---|---|---|---|---|---|
-| Minimal (1h/day) | $13 | $1 | $2 | Free | **~$16/month** |
-| Light developer (2h/day) | $25 | $2 | $3 | Free | **~$30/month** |
-| Moderate (4h/day) | $50 | $3 | $5 | Free | **~$58/month** |
-| Moderate + Power BI Pro | $50 | $3 | $5 | $10 | **~$68/month** |
+### 4.3 Storage — ADLS Gen2 (Azure Blob)
+
+ADLS Gen2 is **not free** but is very cheap. Three types of charges:
+
+| Charge type | Rate (Brazil South LRS) | Example |
+|---|---|---|
+| Storage (capacity) | ~$0.023/GB/month | 100 GB = $2.30/month |
+| Write operations | $0.005 / 10,000 ops | Migrating 10,000 files once = $0.005 |
+| Read operations | $0.004 / 10,000 ops | 1 million reads/month = $0.40 |
+| Data egress to internet | $0.087/GB | Downloading 10GB locally = $0.87 |
+| **Data within same Azure region** | **$0.00** | Databricks → ADLS Gen2 = free |
+
+> The key: reads and writes between Databricks and ADLS Gen2 in the **same region** are free. You only pay egress if you download data to your laptop or another region.
+
+**Monthly storage estimate:**
+
+| Data size | Storage cost | Operations | **Total** |
+|---|---|---|---|
+| 50 GB parquet files | $1.15 | $0.20 | **~$1.35** |
+| 100 GB parquet files | $2.30 | $0.40 | **~$2.70** |
+| 500 GB parquet files | $11.50 | $1.00 | **~$12.50** |
+
+---
+
+### 4.4 Unity Catalog — Metadata Storage
+
+The catalog service itself is free. But the **Unity Catalog metastore requires a small ADLS Gen2 path** for internal metadata storage. This is typically a few MB of metadata — cost is **< $0.10/month**, effectively zero.
+
+---
+
+### 4.5 Honest Total Monthly Cost Summary
+
+Two scenarios assuming Brazil South, Serverless SQL Warehouse, LRS storage, 100 GB of parquet data:
+
+**Scenario A — Very Light Use (1h/day active notebooks, few Genie queries)**
+
+| Component | Cost |
+|---|---|
+| Personal cluster DS2_v2 (20h/month) | $19 |
+| Serverless SQL Warehouse (light Genie + BI) | $3 |
+| ADLS Gen2 100GB + operations | $3 |
+| Key Vault | $0.30 |
+| **Total** | **~$25/month** |
+
+**Scenario B — Light Developer Use (2h/day notebooks, daily Genie + BI)**
+
+| Component | Cost |
+|---|---|
+| Personal cluster DS2_v2 (40h/month) | $39 |
+| Serverless SQL Warehouse (regular use) | $10 |
+| ADLS Gen2 100GB + operations | $3 |
+| Key Vault | $0.30 |
+| Power BI Desktop | $0 (free local app) |
+| **Total** | **~$52/month** |
+
+**Scenario C — Moderate Use (4h/day notebooks, heavy Genie + shared BI)**
+
+| Component | Cost |
+|---|---|
+| Personal cluster DS2_v2 (80h/month) | $78 |
+| Serverless SQL Warehouse (heavy use) | $20 |
+| ADLS Gen2 200GB | $5 |
+| Key Vault | $0.30 |
+| Power BI Pro (1 user, for sharing) | $10 |
+| **Total** | **~$113/month** |
+
+---
+
+### 4.6 Ways to Reduce Costs
+
+| Strategy | Savings | Trade-off |
+|---|---|---|
+| Use East US 2 region instead of Brazil South | ~15-20% | Slightly higher latency from Brazil |
+| Azure Reserved Instances (1-year commit on VM) | 30-40% on VM portion | Must pay upfront or monthly commitment |
+| Visual Studio Dev/Test subscription | 40-55% on compute | Requires VS subscription (~$45/month) |
+| Use spot (preemptible) worker nodes | 60-80% on workers | Workers can be interrupted; driver is stable |
+| Set cluster auto-terminate to 15 min (not 30) | 10-20% on idle time | Need to restart more often |
+| Use DS2_v2 (not DS3_v2) | ~45% less | Less RAM — fine for small parquet exploration |
+| Google Looker Studio instead of Power BI Pro | $10 saved | Different UX, but very capable |
+
+> **Azure Free Credits**: New subscriptions get $200 free for 30 days — enough for a full proof-of-concept before spending anything.
+
+---
+
+### 4.7 Power BI Options
+
+| Option | Cost | Best for |
+|---|---|---|
+| Power BI Desktop (local) | **$0** | Personal dashboards on your PC |
+| Google Looker Studio | **$0** | Shareable web dashboards, free forever |
+| Databricks SQL Dashboards (built-in) | **$0** | Quick internal dashboards, no extra tool |
+| Power BI Service Pro | $10/user/month | Publishing and sharing with a team |
+| Power BI Premium Per User | $20/user/month | AI features + larger datasets |
+
+**Recommendation**: Start with **Databricks SQL Dashboards** (zero cost, already in the workspace) or **Google Looker Studio** (free, browser-based, shareable). Only move to Power BI Pro if you need to share polished reports outside Databricks.
 
 > **Azure Free Credits**: New Azure subscriptions receive $200 in free credits for 30 days.  
 > **Dev/Test Pricing**: If you have a Visual Studio subscription, compute can be 40-55% cheaper.
